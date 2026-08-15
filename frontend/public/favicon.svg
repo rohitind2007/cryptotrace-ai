@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0e1726" />
+      <stop offset="100%" stop-color="#020617" />
+    </radialGradient>
+
+    <!-- Cyan Neon Gradient -->
+    <linearGradient id="cyberNeon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#22d3ee" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+
+    <!-- Inner Core Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Dark Shield Base Container -->
+  <rect width="128" height="128" rx="32" fill="url(#bgGlow)" stroke="rgba(34, 211, 238, 0.2)" stroke-width="2"/>
+
+  <!-- Outer Security Shield Contour -->
+  <path d="M64 20 L96 32 C96 64 80 88 64 104 C48 88 32 64 32 32 Z" 
+        fill="none" 
+        stroke="url(#cyberNeon)" 
+        stroke-width="4" 
+        stroke-linejoin="round"
+        filter="url(#glow)"/>
+
+  <!-- Blockchain Multi-Hop Graph Lines -->
+  <line x1="64" y1="44" x2="48" y2="60" stroke="#38bdf8" stroke-width="2" stroke-dasharray="2 2" opacity="0.8"/>
+  <line x1="64" y1="44" x2="80" y2="60" stroke="#38bdf8" stroke-width="2" stroke-dasharray="2 2" opacity="0.8"/>
+  <line x1="48" y1="60" x2="64" y2="78" stroke="#38bdf8" stroke-width="2" opacity="0.8"/>
+  <line x1="80" y1="60" x2="64" y2="78" stroke="#38bdf8" stroke-width="2" opacity="0.8"/>
+
+  <!-- Forensic Graph Vertices / Nodes -->
+  <circle cx="64" cy="44" r="5" fill="#f43f5e" filter="url(#glow)"/>  <!-- Flagged Origin Point -->
+  <circle cx="48" cy="60" r="4" fill="#22d3ee"/>
+  <circle cx="80" cy="60" r="4" fill="#22d3ee"/>
+  <circle cx="64" cy="78" r="5" fill="#38bdf8" filter="url(#glow)"/>  <!-- Destination Core -->
+</svg>
