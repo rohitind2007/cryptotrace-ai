@@ -15,28 +15,42 @@ export default function App() {
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
   useEffect(() => {
-    let socket: WebSocket;
+    let isMounted = true;
 
-    const connect = () => {
-      socket = new WebSocket("ws://localhost:8000/ws/stream");
-
-      socket.onopen = () => setIsConnected(true);
-      socket.onclose = () => {
-        setIsConnected(false);
-        setTimeout(connect, 3000);
-      };
-
-      socket.onmessage = (event) => {
-        const data: TransactionPayload = JSON.parse(event.data);
-        setTransactions((prev) => [data, ...prev.slice(0, 49)]);
-        if (data.is_suspicious) {
-          setAlerts((prev) => [data, ...prev.slice(0, 19)]);
+    const fetchFeed = async () => {
+      try {
+        const response = await fetch("/api/feed");
+        if (response.ok) {
+          const newTxs = await response.json();
+          if (isMounted) {
+            setIsConnected(true);
+            if (Array.isArray(newTxs) && newTxs.length > 0) {
+              setTransactions((prev) => [...newTxs, ...prev].slice(0, 50));
+              const newAlerts = newTxs.filter((t: TransactionPayload) => t.is_suspicious);
+              if (newAlerts.length > 0) {
+                setAlerts((prev) => [...newAlerts, ...prev].slice(0, 20));
+              }
+            }
+          }
+        } else {
+          if (isMounted) setIsConnected(false);
         }
-      };
+      } catch (err) {
+        console.error("Polling error:", err);
+        if (isMounted) setIsConnected(false);
+      }
     };
 
-    connect();
-    return () => socket?.close();
+    // Initial fetch when tab opens
+    fetchFeed();
+
+    // Poll every 3.5 seconds while tab is active
+    const interval = setInterval(fetchFeed, 3500);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   // Updates the Money Flow Graph only
@@ -59,8 +73,8 @@ export default function App() {
           <>
             <div className="lg:col-span-2 flex flex-col gap-6">
               <div className="h-[420px]">
-                <LiveFeedTable 
-                  transactions={transactions} 
+                <LiveFeedTable
+                  transactions={transactions}
                   onSelectTx={handleSelectTransaction}
                   onOpenReport={handleOpenReport}
                 />
@@ -70,9 +84,9 @@ export default function App() {
               </div>
             </div>
             <div className="h-full">
-              <AlertCards 
-                alerts={alerts} 
-                onSelectAlert={handleOpenReport} 
+              <AlertCards
+                alerts={alerts}
+                onSelectAlert={handleOpenReport}
               />
             </div>
           </>
@@ -89,8 +103,8 @@ export default function App() {
             <h3 className="text-xl font-heading italic text-white">Node Health & Pipeline</h3>
             <div className="grid grid-cols-3 gap-4 font-mono text-xs">
               <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block">Web3 Ingestion</span>
-                <span className="text-emerald-400 font-bold text-base">ACTIVE (Ethereum Mainnet)</span>
+                <span className="text-white/40 block">Serverless Ingestion</span>
+                <span className="text-emerald-400 font-bold text-base">ACTIVE (On-Demand)</span>
               </div>
               <div className="p-4 bg-black/40 rounded-xl border border-white/5">
                 <span className="text-white/40 block">ML Engine</span>
