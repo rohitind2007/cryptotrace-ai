@@ -25,7 +25,6 @@ export default function App() {
           if (isMounted && Array.isArray(incoming) && incoming.length > 0) {
             setIsConnected(true);
 
-            // Deduplicate incoming feed transactions by hash
             setTransactions((prev) => {
               const existingHashes = new Set(prev.map((t) => t.tx_hash));
               const fresh = incoming.filter((t) => !existingHashes.has(t.tx_hash));
@@ -33,7 +32,6 @@ export default function App() {
               return [...fresh, ...prev].slice(0, 50);
             });
 
-            // Deduplicate suspicious alerts by hash
             setAlerts((prev) => {
               const existingAlertHashes = new Set(prev.map((t) => t.tx_hash));
               const freshAlerts = incoming.filter(
@@ -61,74 +59,83 @@ export default function App() {
     };
   }, []);
 
-  // Updates the Money Flow Graph only
   const handleSelectTransaction = useCallback((tx: TransactionPayload) => {
     setSelectedAddress(tx.from);
   }, []);
 
-  // Opens the Forensic Dossier Modal
   const handleOpenReport = useCallback((tx: TransactionPayload) => {
     setSelectedTx(tx);
     setSelectedAddress(tx.from);
   }, []);
 
   return (
-    <div className="min-h-screen bg-cyber-bg text-slate-100 flex flex-col font-sans pt-20 md:pt-24 px-3 sm:px-6 md:px-8 pb-8">
+    <div className="min-h-screen bg-cyber-bg text-slate-100 flex flex-col font-sans pt-20 lg:pt-24 px-4 sm:px-6 lg:px-10 pb-8">
       <Navbar activeTab={activeTab} onSelectTab={setActiveTab} status={isConnected} />
 
-      <main className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 flex-1 max-w-7xl mx-auto w-full">
+      <main className="flex-1 max-w-[1600px] mx-auto w-full flex flex-col">
         {activeTab === 'terminal' && (
-          <>
-            <div className="lg:col-span-2 flex flex-col gap-4 md:gap-6">
-              <div className="min-h-[320px] md:h-[420px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Main Stream (7/12 cols on desktop) */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              {/* Live Ingestion Table */}
+              <div className="h-[380px] lg:h-[430px] w-full">
                 <LiveFeedTable
                   transactions={transactions}
                   onSelectTx={handleSelectTransaction}
                   onOpenReport={handleOpenReport}
                 />
               </div>
-              <div className="h-[300px] sm:h-[340px] md:h-[380px]">
+
+              {/* Topological Money Flow Graph */}
+              <div className="h-[340px] lg:h-[390px] w-full">
                 <MoneyFlowCanvas selectedAddress={selectedAddress} />
               </div>
             </div>
-            <div className="h-auto lg:h-full">
+
+            {/* Right Alerts Sentinel Panel (4/12 cols on desktop - sticky matched height) */}
+            <div className="lg:col-span-4 h-[450px] lg:h-[844px] lg:sticky lg:top-24">
               <AlertCards
                 alerts={alerts}
                 onSelectAlert={handleOpenReport}
               />
             </div>
-          </>
+          </div>
         )}
 
         {activeTab === 'investigation' && (
-          <div className="lg:col-span-3 h-[450px] sm:h-[600px] md:h-[750px]">
+          <div className="w-full h-[550px] lg:h-[820px]">
             <MoneyFlowCanvas selectedAddress={selectedAddress || transactions[0]?.from || null} />
           </div>
         )}
 
         {activeTab === 'node' && (
-          <div className="lg:col-span-3 liquid-glass p-5 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-white/5 space-y-4">
-            <h3 className="text-lg md:text-xl font-heading italic text-white">Node Health & Pipeline</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 font-mono text-xs">
-              <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block text-[10px] sm:text-xs">Web3 Ingestion</span>
-                <span className="text-emerald-400 font-bold text-sm sm:text-base">ACTIVE (Ethereum Mainnet)</span>
+          <div className="liquid-glass p-6 lg:p-10 rounded-3xl lg:rounded-[2.5rem] border border-white/5 space-y-6">
+            <div>
+              <h3 className="text-xl lg:text-2xl font-heading italic text-white">Node Health & Pipeline Sentinel</h3>
+              <p className="text-xs text-white/40 font-mono mt-1">Real-time telemetry of Web3 RPC streams and heuristic decision cores.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono">
+              <div className="p-5 bg-black/40 rounded-2xl border border-white/5">
+                <span className="text-white/40 block text-xs uppercase tracking-wider mb-1">Web3 Ingestion</span>
+                <span className="text-emerald-400 font-bold text-lg">ACTIVE</span>
+                <span className="text-white/30 block text-[10px] mt-1">Ethereum Mainnet (JSON-RPC)</span>
               </div>
-              <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block text-[10px] sm:text-xs">ML Engine</span>
-                <span className="text-cyber-cyan font-bold text-sm sm:text-base">IsolationForest</span>
+              <div className="p-4 lg:p-5 bg-black/40 rounded-2xl border border-white/5">
+                <span className="text-white/40 block text-xs uppercase tracking-wider mb-1">ML Engine</span>
+                <span className="text-cyber-cyan font-bold text-lg">IsolationForest</span>
+                <span className="text-white/30 block text-[10px] mt-1">Contamination: 0.05 (Unsupervised)</span>
               </div>
-              <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block text-[10px] sm:text-xs">Reasoning Core</span>
-                <span className="text-cyber-rose font-bold text-sm sm:text-base">Google Gemini</span>
+              <div className="p-4 lg:p-5 bg-black/40 rounded-2xl border border-white/5">
+                <span className="text-white/40 block text-xs uppercase tracking-wider mb-1">Reasoning Core</span>
+                <span className="text-cyber-rose font-bold text-lg">Google Gemini</span>
+                <span className="text-white/30 block text-[10px] mt-1">Forensic Dossier Synthesis</span>
               </div>
             </div>
           </div>
         )}
       </main>
 
-      {/* Global Page Footer */}
-      <footer className="mt-8 md:mt-12 text-center font-mono text-[9px] md:text-[10px] text-white/30 tracking-wider">
+      <footer className="mt-10 text-center font-mono text-[10px] text-white/30 tracking-wider">
         CRYPTOTRACE AI • ETHEREUM AML & FRAUD SENTINEL
       </footer>
 
