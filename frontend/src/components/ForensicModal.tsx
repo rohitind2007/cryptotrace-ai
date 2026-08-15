@@ -123,10 +123,10 @@ export default function ForensicModal({ tx, onClose }: Props) {
           </div>
         </div>
 
-        {/* Footer info line */}
-        <div className="px-8 py-3 bg-white/[0.02] border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-white/20">
-          <span>BLOCK_HEIGHT: {tx.block_number}</span>
-          <span>GAS: {tx.gas_price_gwei.toFixed(2)} Gwei</span>
+        {/* Modal Bottom Footer Info Line */}
+        <div className="px-8 py-3 bg-white/[0.02] border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-white/40">
+          <span>BLOCK_HEIGHT: {tx.block_number ?? "PENDING"}</span>
+          <span>GAS: {Number(tx.gas_price_gwei || 0).toFixed(2)} Gwei</span>
         </div>
       </motion.div>
     </div>

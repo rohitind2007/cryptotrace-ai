@@ -23,9 +23,12 @@ export default function MoneyFlowCanvas({ selectedAddress }: Props) {
     if (!selectedAddress) return;
 
     setLoading(true);
-    fetch(`http://localhost:8000/api/graph/${selectedAddress}?hops=2`)
+    // Use relative endpoint so Vercel routes to the serverless function
+    fetch(`/api/graph/${selectedAddress}?hops=2`)
       .then((res) => res.json())
       .then((data) => {
+        const targetLower = selectedAddress.toLowerCase();
+
         const computedNodes: Node[] = (data.nodes || []).map(
           (n: any, idx: number) => ({
             id: n.id,
@@ -35,10 +38,10 @@ export default function MoneyFlowCanvas({ selectedAddress }: Props) {
             },
             style: {
               background:
-                n.id === selectedAddress.toLowerCase() ? "#0f172a" : "#020617",
+                n.id.toLowerCase() === targetLower ? "#0f172a" : "#020617",
               color: "#22d3ee",
               border:
-                n.id === selectedAddress.toLowerCase()
+                n.id.toLowerCase() === targetLower
                   ? "2px solid #f43f5e"
                   : "1px solid rgba(255,255,255,0.15)",
               borderRadius: "12px",

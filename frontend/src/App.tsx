@@ -118,6 +118,10 @@ export default function App() {
           </div>
         )}
       </main>
+      {/* Global Page Footer */}
+      <footer className="mt-12 text-center font-mono text-[10px] text-white/30 tracking-wider">
+        CRYPTOTRACE AI • ETHEREUM AML & FRAUD SENTINEL
+      </footer>
 
       <ForensicModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
     </div>
