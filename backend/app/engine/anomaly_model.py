@@ -1,9 +1,11 @@
 import os
+import tempfile
 import joblib
-import numpy as np
 from sklearn.ensemble import IsolationForest
 
-MODEL_FILE = "eth_isolation_forest.joblib"
+# Use /tmp on serverless environments (or fallback locally)
+MODEL_DIR = "/tmp" if os.path.exists("/tmp") else "."
+MODEL_FILE = os.path.join(MODEL_DIR, "eth_isolation_forest.joblib")
 
 
 class AnomalyDetectionModel:
@@ -12,34 +14,40 @@ class AnomalyDetectionModel:
         self._init_model()
 
     def _init_model(self):
+        # Check if pre-trained model exists in read-only package dir or /tmp
+        local_model_path = os.path.join(os.path.dirname(__file__), "eth_isolation_forest.joblib")
+
+        if os.path.exists(local_model_path):
+            try:
+                self.model = joblib.load(local_model_path)
+                return
+            except Exception:
+                pass
+
         if os.path.exists(MODEL_FILE):
-            self.model = joblib.load(MODEL_FILE)
-        else:
-            # Train baseline on statistical distribution of Ethereum transactions
-            np.random.seed(42)
-            n_samples = 4000
-            val_eth = np.random.lognormal(mean=-1.2, sigma=1.1, size=n_samples)
-            gas_gwei = np.random.normal(loc=24.0, scale=9.0, size=n_samples)
-            gas_limit = np.random.choice([21000, 55000, 100000, 250000], size=n_samples, p=[0.75, 0.15, 0.07, 0.03])
-            nonce = np.random.exponential(scale=15.0, size=n_samples)
+            try:
+                self.model = joblib.load(MODEL_FILE)
+                return
+            except Exception:
+                pass
 
-            X_train = np.column_stack([val_eth, gas_gwei, gas_limit, nonce])
-            self.model = IsolationForest(n_estimators=120, contamination=0.03, random_state=42)
-            self.model.fit(X_train)
+        # Train standard Isolation Forest
+        self.model = IsolationForest(
+            n_estimators=100,
+            contamination=0.05,
+            random_state=42
+        )
+
+        # Train on dummy synthetic data so it's ready
+        import numpy as np
+        synthetic_data = np.random.rand(100, 4)
+        self.model.fit(synthetic_data)
+
+        # Try to save to /tmp safely without crashing if read-only
+        try:
             joblib.dump(self.model, MODEL_FILE)
-
-    def evaluate(self, val_eth: float, gas_gwei: float, gas_limit: float, nonce: float) -> dict:
-        features = np.array([[val_eth, gas_gwei, gas_limit, nonce]])
-        raw_score = float(self.model.decision_function(features)[0])
-        is_anomaly = bool(self.model.predict(features)[0] == -1)
-
-        # Scale into 0 - 100 risk score
-        scaled_risk = int(np.clip((0.18 - raw_score) * 160, 0, 100))
-        return {
-            "is_anomaly": is_anomaly,
-            "ml_anomaly_score": scaled_risk,
-            "decision_confidence": round(raw_score, 4)
-        }
+        except OSError:
+            pass  # Keep in-memory if disk write is forbidden
 
 
 ml_model = AnomalyDetectionModel()
