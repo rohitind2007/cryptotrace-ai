@@ -99,24 +99,24 @@ export default function App() {
         )}
 
         {activeTab === 'node' && (
-          <div className="lg:col-span-3 liquid-glass p-8 rounded-[2.5rem] border border-white/5 space-y-4">
-            <h3 className="text-xl font-heading italic text-white">Node Health & Pipeline</h3>
-            <div className="grid grid-cols-3 gap-4 font-mono text-xs">
-              <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block">Serverless Ingestion</span>
-                <span className="text-emerald-400 font-bold text-base">ACTIVE (On-Demand)</span>
-              </div>
-              <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block">ML Engine</span>
-                <span className="text-cyber-cyan font-bold text-base">IsolationForest</span>
-              </div>
-              <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block">Reasoning Core</span>
-                <span className="text-cyber-rose font-bold text-base">Google Gemini</span>
-              </div>
-            </div>
-          </div>
-        )}
+  <div className="lg:col-span-3 liquid-glass p-8 rounded-[2.5rem] border border-white/5 space-y-4">
+    <h3 className="text-xl font-heading italic text-white">Node Health & Pipeline</h3>
+    <div className="grid grid-cols-3 gap-4 font-mono text-xs">
+      <div className="p-4 bg-black/40 rounded-xl border border-white/5">
+        <span className="text-white/40 block">Web3 Ingestion</span>
+        <span className="text-emerald-400 font-bold text-base">ACTIVE (Ethereum Mainnet)</span>
+      </div>
+      <div className="p-4 bg-black/40 rounded-xl border border-white/5">
+        <span className="text-white/40 block">ML Engine</span>
+        <span className="text-cyber-cyan font-bold text-base">IsolationForest</span>
+      </div>
+      <div className="p-4 bg-black/40 rounded-xl border border-white/5">
+        <span className="text-white/40 block">Reasoning Core</span>
+        <span className="text-cyber-rose font-bold text-base">Google Gemini</span>
+      </div>
+    </div>
+  </div>
+)}
       </main>
       {/* Global Page Footer */}
       <footer className="mt-12 text-center font-mono text-[10px] text-white/30 tracking-wider">
