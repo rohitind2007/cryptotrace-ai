@@ -15,6 +15,7 @@ import {
   Crosshair,
   Terminal as TerminalIcon
 } from "lucide-react";
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 export default function App() {
   const [transactions, setTransactions] = useState<TransactionPayload[]>([]);
@@ -249,6 +250,7 @@ export default function App() {
       </footer>
 
       <ForensicModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
+      <SpeedInsights />
     </div>
   );
 }
