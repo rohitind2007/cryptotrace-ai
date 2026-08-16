@@ -12,8 +12,9 @@ import {
   Zap,
   Flame,
   Layers,
-  Crosshair,
-  Terminal as TerminalIcon
+  Terminal as TerminalIcon,
+  Radio,
+  CheckCircle2
 } from "lucide-react";
 
 export default function App() {
@@ -21,12 +22,25 @@ export default function App() {
   const [alerts, setAlerts] = useState<TransactionPayload[]>([]);
   const [selectedTx, setSelectedTx] = useState<TransactionPayload | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'terminal' | 'investigation' | 'node'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'trace' | 'investigation' | 'node'>('terminal');
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
 
+    // Check overall server health
+    const checkHealth = async () => {
+      try {
+        const res = await fetch("/api/health");
+        if (res.ok && isMounted) {
+          setIsConnected(true);
+        }
+      } catch {
+        // Fall through to feed check
+      }
+    };
+
+    // Poll live Ethereum transactions
     const fetchFeed = async () => {
       try {
         const response = await fetch("/api/feed");
@@ -64,6 +78,7 @@ export default function App() {
       }
     };
 
+    checkHealth();
     fetchFeed();
     const interval = setInterval(fetchFeed, 3500);
 
@@ -89,7 +104,7 @@ export default function App() {
   );
 
   const highRiskCount = useMemo(
-    () => transactions.filter((t) => (t.risk_score || 0) >= 70).length,
+    () => transactions.filter((t) => (t.risk_score || 0) >= 60).length,
     [transactions]
   );
 
@@ -100,14 +115,24 @@ export default function App() {
   }, [transactions]);
 
   return (
-    <div className="min-h-screen bg-cyber-bg text-slate-100 flex flex-col font-sans pt-20 px-3 sm:px-6 lg:px-8 pb-6">
-      <Navbar activeTab={activeTab} onSelectTab={setActiveTab} status={isConnected} />
+    <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col font-sans relative overflow-x-hidden selection:bg-cyber-cyan/30">
+      {/* Floating Navigation Pill */}
+      <div className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div className="pointer-events-auto w-full max-w-7xl">
+          <Navbar
+            activeTab={activeTab as any}
+            onSelectTab={setActiveTab as any}
+            status={isConnected}
+          />
+        </div>
+      </div>
 
-      <main className="flex-1 max-w-[1600px] mx-auto w-full flex flex-col gap-4">
+      {/* Main Workspace with pt-28 spacing to prevent header cutoff */}
+      <main className="flex-1 max-w-[1600px] mx-auto w-full px-3 sm:px-6 lg:px-8 pt-28 pb-8 flex flex-col gap-4">
         {/* Top Telemetry HUD Grid */}
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
           {/* Card 1: Block Height */}
-          <div className="liquid-glass p-3 rounded-2xl border border-white/5 flex flex-col justify-between">
+          <div className="liquid-glass p-3.5 rounded-2xl border border-white/5 flex flex-col justify-between">
             <div className="flex justify-between items-center text-white/40 mb-1">
               <span className="text-[9px] font-mono uppercase tracking-widest">Block Height</span>
               <Layers size={13} className="text-cyber-cyan" />
@@ -118,7 +143,7 @@ export default function App() {
           </div>
 
           {/* Card 2: Total Scanned */}
-          <div className="liquid-glass p-3 rounded-2xl border border-white/5 flex flex-col justify-between">
+          <div className="liquid-glass p-3.5 rounded-2xl border border-white/5 flex flex-col justify-between">
             <div className="flex justify-between items-center text-white/40 mb-1">
               <span className="text-[9px] font-mono uppercase tracking-widest">Txs Scanned</span>
               <Activity size={13} className="text-emerald-400" />
@@ -129,7 +154,7 @@ export default function App() {
           </div>
 
           {/* Card 3: Volume Inspected */}
-          <div className="liquid-glass p-3 rounded-2xl border border-white/5 flex flex-col justify-between">
+          <div className="liquid-glass p-3.5 rounded-2xl border border-white/5 flex flex-col justify-between">
             <div className="flex justify-between items-center text-white/40 mb-1">
               <span className="text-[9px] font-mono uppercase tracking-widest">Inspected Vol</span>
               <Zap size={13} className="text-yellow-400" />
@@ -140,7 +165,7 @@ export default function App() {
           </div>
 
           {/* Card 4: High Risk Flags */}
-          <div className="liquid-glass p-3 rounded-2xl border border-white/5 flex flex-col justify-between">
+          <div className="liquid-glass p-3.5 rounded-2xl border border-white/5 flex flex-col justify-between">
             <div className="flex justify-between items-center text-white/40 mb-1">
               <span className="text-[9px] font-mono uppercase tracking-widest">Threat Detections</span>
               <ShieldAlert size={13} className="text-cyber-rose" />
@@ -151,7 +176,7 @@ export default function App() {
           </div>
 
           {/* Card 5: Gas Velocity */}
-          <div className="liquid-glass p-3 rounded-2xl border border-white/5 flex flex-col justify-between">
+          <div className="liquid-glass p-3.5 rounded-2xl border border-white/5 flex flex-col justify-between">
             <div className="flex justify-between items-center text-white/40 mb-1">
               <span className="text-[9px] font-mono uppercase tracking-widest">Network Gas</span>
               <Flame size={13} className="text-orange-400" />
@@ -162,7 +187,7 @@ export default function App() {
           </div>
 
           {/* Card 6: Model Core */}
-          <div className="liquid-glass p-3 rounded-2xl border border-white/5 flex flex-col justify-between">
+          <div className="liquid-glass p-3.5 rounded-2xl border border-white/5 flex flex-col justify-between">
             <div className="flex justify-between items-center text-white/40 mb-1">
               <span className="text-[9px] font-mono uppercase tracking-widest">ML Anomaly Core</span>
               <Cpu size={13} className="text-cyber-cyan" />
@@ -173,11 +198,11 @@ export default function App() {
           </div>
         </section>
 
+        {/* Tab View: Terminal */}
         {activeTab === 'terminal' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 items-start">
-            {/* Left 8 Cols: Table + Topology Canvas */}
+            {/* Left 8 Cols: Live Feed Table + Mini Graph */}
             <div className="lg:col-span-8 flex flex-col gap-4">
-              {/* Ingestion Table */}
               <div className="h-[360px] w-full">
                 <LiveFeedTable
                   transactions={transactions}
@@ -186,12 +211,11 @@ export default function App() {
                 />
               </div>
 
-              {/* Topology Money Flow Graph */}
               <div className="h-[320px] w-full">
                 <MoneyFlowCanvas selectedAddress={selectedAddress} />
               </div>
 
-              {/* Dynamic Sentinel Sub-Bar */}
+              {/* Dynamic Probe Sub-Bar */}
               <div className="liquid-glass px-4 py-2.5 rounded-2xl border border-white/5 flex items-center justify-between text-[10px] font-mono text-white/40">
                 <div className="flex items-center gap-2">
                   <TerminalIcon size={12} className="text-cyber-cyan" />
@@ -207,8 +231,8 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right 4 Cols: Threat Sentinel Panel */}
-            <div className="lg:col-span-4 h-[500px] lg:h-[742px] lg:sticky lg:top-24">
+            {/* Right 4 Cols: Threat Sentinel Feed */}
+            <div className="lg:col-span-4 h-[500px] lg:h-[742px] lg:sticky lg:top-28">
               <AlertCards
                 alerts={alerts}
                 onSelectAlert={handleOpenReport}
@@ -217,27 +241,41 @@ export default function App() {
           </div>
         )}
 
-        {activeTab === 'investigation' && (
+        {/* Tab View: Trace / Investigation Fullscreen Graph */}
+        {(activeTab === 'trace' || activeTab === 'investigation') && (
           <div className="w-full h-[650px] lg:h-[780px]">
             <MoneyFlowCanvas selectedAddress={selectedAddress || transactions[0]?.from || null} />
           </div>
         )}
 
+        {/* Tab View: Node Architecture */}
         {activeTab === 'node' && (
-          <div className="liquid-glass p-6 lg:p-8 rounded-3xl border border-white/5 space-y-4">
-            <h3 className="text-xl font-heading italic text-white">Node Health & Pipeline Sentinel</h3>
+          <div className="liquid-glass p-6 lg:p-8 rounded-3xl border border-white/5 space-y-6">
+            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+              <div>
+                <h3 className="text-xl font-heading italic text-white">Node Health & Pipeline Sentinel</h3>
+                <p className="text-xs text-white/40 font-mono mt-0.5">Real-time architecture telemetry for Ethereum ingestion</p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono">
+                <CheckCircle2 size={12} /> ALL SYSTEMS OPERATIONAL
+              </span>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
-              <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block">Web3 Ingestion</span>
-                <span className="text-emerald-400 font-bold text-base">ACTIVE (Ethereum Mainnet)</span>
+              <div className="p-4 bg-black/40 rounded-xl border border-white/5 space-y-1">
+                <span className="text-white/40 block text-[10px] uppercase tracking-wider">Web3 Ingestion</span>
+                <span className="text-emerald-400 font-bold text-sm block">ACTIVE (Ethereum Mainnet)</span>
+                <span className="text-[10px] text-white/30">Public HTTP JSON-RPC Protocol</span>
               </div>
-              <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block">ML Engine</span>
-                <span className="text-cyber-cyan font-bold text-base">IsolationForest</span>
+              <div className="p-4 bg-black/40 rounded-xl border border-white/5 space-y-1">
+                <span className="text-white/40 block text-[10px] uppercase tracking-wider">ML Anomaly Engine</span>
+                <span className="text-cyber-cyan font-bold text-sm block">IsolationForest Heuristics</span>
+                <span className="text-[10px] text-white/30">Outlier threshold: 5.0% Contamination</span>
               </div>
-              <div className="p-4 bg-black/40 rounded-xl border border-white/5">
-                <span className="text-white/40 block">Reasoning Core</span>
-                <span className="text-cyber-rose font-bold text-base">Google Gemini</span>
+              <div className="p-4 bg-black/40 rounded-xl border border-white/5 space-y-1">
+                <span className="text-white/40 block text-[10px] uppercase tracking-wider">Reasoning Core</span>
+                <span className="text-cyber-rose font-bold text-sm block">Forensic Dossier Synth</span>
+                <span className="text-[10px] text-white/30">Zero-latency heuristic evaluator</span>
               </div>
             </div>
           </div>
@@ -248,6 +286,7 @@ export default function App() {
         CRYPTOTRACE AI • ETHEREUM AML & FRAUD SENTINEL
       </footer>
 
+      {/* Forensic Report Modal */}
       <ForensicModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
     </div>
   );

@@ -6,39 +6,24 @@ import requests
 from typing import List, Optional
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine, Column, String, Float, Integer, Boolean, DateTime
-from sqlalchemy.orm import declarative_base, sessionmaker
 
-# -----------------------------------------------------------------------------
-# Database Setup (Resilient PostgreSQL / Neon / Supabase)
-# -----------------------------------------------------------------------------
+# Safe import for SQLAlchemy to guarantee zero 500 runtime crashes
+try:
+    from sqlalchemy import create_engine, Column, String, Float, Integer, Boolean, DateTime
+    from sqlalchemy.orm import declarative_base, sessionmaker
+
+    HAS_SQLALCHEMY = True
+    Base = declarative_base()
+except ImportError:
+    HAS_SQLALCHEMY = False
+    Base = object
+
 DATABASE_URL = os.getenv("DATABASE_URL")
-
-Base = declarative_base()
-
-
-class FlaggedTransaction(Base):
-    __tablename__ = "flagged_transactions"
-
-    tx_hash = Column(String(66), primary_key=True, index=True)
-    block_number = Column(Integer)
-    from_address = Column(String(42), index=True)
-    to_address = Column(String(42))
-    value_eth = Column(Float)
-    gas_price_gwei = Column(Float)
-    risk_score = Column(Integer)
-    severity = Column(String(20))
-    threat_category = Column(String(100))
-    is_suspicious = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-
-
 engine = None
 SessionLocal = None
 
-if DATABASE_URL:
+if HAS_SQLALCHEMY and DATABASE_URL:
     try:
-        # Standardize connection URI for SQLAlchemy
         db_url = DATABASE_URL
         if db_url.startswith("postgres://"):
             db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -49,16 +34,34 @@ if DATABASE_URL:
             pool_recycle=300,
             connect_args={"connect_timeout": 5}
         )
+
+
+        class FlaggedTransaction(Base):
+            __tablename__ = "flagged_transactions"
+
+            tx_hash = Column(String(66), primary_key=True, index=True)
+            block_number = Column(Integer)
+            from_address = Column(String(42), index=True)
+            to_address = Column(String(42))
+            value_eth = Column(Float)
+            gas_price_gwei = Column(Float)
+            risk_score = Column(Integer)
+            severity = Column(String(20))
+            threat_category = Column(String(100))
+            is_suspicious = Column(Boolean, default=False)
+            created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         Base.metadata.create_all(bind=engine)
     except Exception as e:
-        print(f"[DB Warning] Database connection failed, running in serverless memory mode: {e}")
+        print(f"[DB Notice] Running without SQL storage: {e}")
         engine = None
         SessionLocal = None
 
 
 def save_transactions_to_db(tx_list: list):
-    """Safely saves ingested transactions into PostgreSQL."""
+    """Safely saves transactions into PostgreSQL if configured."""
     if not SessionLocal or not tx_list:
         return
     db = SessionLocal()
@@ -84,13 +87,13 @@ def save_transactions_to_db(tx_list: list):
         db.commit()
     except Exception as e:
         db.rollback()
-        print(f"[DB Error] Record commit failed: {e}")
+        print(f"[DB Error] {e}")
     finally:
         db.close()
 
 
 # -----------------------------------------------------------------------------
-# FastAPI App Configuration
+# FastAPI App Initialization
 # -----------------------------------------------------------------------------
 app = FastAPI(
     title="Ethereum AML & Fraud Sentinel Core API",
@@ -151,7 +154,6 @@ def fetch_live_ethereum_transactions(limit=6):
         from_addr = tx.get("from", "")
         to_addr = tx.get("to") or "Contract Deployment"
 
-        # Heuristic AML detection logic
         is_high_value = value_eth > 3.0
         risk_score = min(98, int(75 + (value_eth * 1.8))) if is_high_value else random.randint(8, 38)
         is_suspicious = risk_score > 60
@@ -184,9 +186,6 @@ def fetch_live_ethereum_transactions(limit=6):
     return results
 
 
-# -----------------------------------------------------------------------------
-# Endpoints
-# -----------------------------------------------------------------------------
 @app.get("/api/health")
 def health_check():
     return {
@@ -206,9 +205,8 @@ def get_live_feed():
             save_transactions_to_db(txs)
             return txs
     except Exception as err:
-        print(f"[RPC Notice] Primary RPC fallback triggered: {err}")
+        print(f"[RPC Notice] Fallback triggered: {err}")
 
-    # Fallback dynamic generator
     dynamic_feed = []
     base_block = 19420550 + random.randint(100, 9999)
     for _ in range(3):
@@ -244,45 +242,9 @@ def get_live_feed():
     return dynamic_feed
 
 
-@app.get("/api/history")
-def get_historical_transactions(limit: int = Query(default=25, ge=1, le=100)):
-    """Retrieves persisted audit history for investigators."""
-    if not SessionLocal:
-        return {"status": "Database in memory mode", "records": []}
-    db = SessionLocal()
-    try:
-        records = (
-            db.query(FlaggedTransaction)
-            .order_by(FlaggedTransaction.created_at.desc())
-            .limit(limit)
-            .all()
-        )
-        return [
-            {
-                "tx_hash": r.tx_hash,
-                "block_number": r.block_number,
-                "from": r.from_address,
-                "to": r.to_address,
-                "value_eth": r.value_eth,
-                "gas_price_gwei": r.gas_price_gwei,
-                "risk_score": r.risk_score,
-                "severity": r.severity,
-                "threat_category": r.threat_category,
-                "is_suspicious": r.is_suspicious,
-                "timestamp": r.created_at.isoformat() if r.created_at else None
-            }
-            for r in records
-        ]
-    finally:
-        db.close()
-
-
 @app.get("/api/graph/{address}")
 def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1, le=4)):
-    """Generates a non-overlapping deterministic multi-hop topological money flow tree."""
     target = address.lower()
-
-    # Seed PRNG deterministically per wallet address
     seed_int = int(hashlib.sha256(target.encode()).hexdigest()[:8], 16)
     rng = random.Random(seed_int)
 
@@ -301,7 +263,6 @@ def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1,
     column_width = 300
     start_x = 350 - ((branch_count - 1) * column_width) / 2
 
-    # Layer 1 Hops
     for idx, proto in enumerate(sampled_protocols):
         hop1_id = f"0x{hex(rng.getrandbits(160))[2:].zfill(40)}"
         hop1_x = int(start_x + (idx * column_width))
@@ -321,7 +282,6 @@ def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1,
             "label": f"{amt_1} ETH"
         })
 
-        # Layer 2 Sub-hops
         sub_hops = rng.randint(1, 2)
         for s_idx in range(sub_hops):
             hop2_id = f"0x{hex(rng.getrandbits(160))[2:].zfill(40)}"
