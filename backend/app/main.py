@@ -1,6 +1,7 @@
 import os
-import requests
 import random
+import hashlib
+import requests
 from typing import List, Optional
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,6 +23,23 @@ app.add_middleware(
 )
 
 ETH_RPC_URL = os.getenv("ETH_RPC_URL", "https://ethereum-rpc.publicnode.com")
+
+PROTOCOLS_POOL = [
+    {"label": "Uniswap V3 Pool", "type": "DEX"},
+    {"label": "Tether USD (USDT)", "type": "STABLECOIN"},
+    {"label": "Tornado.Cash Mixer", "type": "MIXER"},
+    {"label": "Binance Hot Deposit", "type": "CEX"},
+    {"label": "Aave V3 Lending Pool", "type": "LENDING"},
+    {"label": "Curve.fi 3pool", "type": "DEX"},
+    {"label": "Coinbase Exchange", "type": "CEX"},
+    {"label": "MakerDAO Vault", "type": "DEFI"},
+    {"label": "1inch Aggregator", "type": "ROUTER"},
+    {"label": "Lido Staking Contract", "type": "STAKING"},
+    {"label": "Kraken Hot Wallet", "type": "CEX"},
+    {"label": "Wintermute MM", "type": "MM"},
+    {"label": "FixedFloat Instant", "type": "EXCHANGE"},
+    {"label": "Railgun Relayer", "type": "MIXER"}
+]
 
 def fetch_live_ethereum_transactions(limit=6):
     """Direct JSON-RPC call to Ethereum Mainnet to fetch real latest block txs."""
@@ -48,8 +66,8 @@ def fetch_live_ethereum_transactions(limit=6):
         to_addr = tx.get("to") or "Contract Deployment"
 
         # Evaluation heuristics
-        is_high_value = value_eth > 5.0
-        risk_score = min(98, int(80 + (value_eth * 1.5))) if is_high_value else random.randint(10, 35)
+        is_high_value = value_eth > 3.0
+        risk_score = min(98, int(75 + (value_eth * 1.8))) if is_high_value else random.randint(8, 38)
         is_suspicious = risk_score > 60
 
         results.append({
@@ -64,16 +82,16 @@ def fetch_live_ethereum_transactions(limit=6):
             "risk_score": risk_score,
             "severity": "CRITICAL" if risk_score > 80 else ("HIGH" if risk_score > 60 else "LOW"),
             "is_suspicious": is_suspicious,
-            "rules_triggered": ["High Volume Layering"] if is_high_value else [],
+            "rules_triggered": ["Mixer Layering", "High Velocity"] if is_high_value else [],
             "ml_anomaly_metrics": {
                 "is_anomaly": is_suspicious,
                 "ml_anomaly_score": round(-0.55 - (risk_score / 200), 2) if is_suspicious else 0.25,
-                "decision_confidence": 92.8
+                "decision_confidence": 93.4
             },
             "ai_forensic_dossier": {
-                "threat_category": "Sanctioned Entity Outflow" if is_suspicious else "Standard Settlement",
-                "investigator_summary": f"On-chain transfer of {value_eth} ETH in Block #{block_number}.",
-                "recommended_action": "Flag wallet and initiate AML tracing." if is_suspicious else "Standard execution.",
+                "threat_category": "Sanctioned Entity Outflow" if is_suspicious else "Standard Transaction",
+                "investigator_summary": f"Detected {value_eth} ETH transfer on Block #{block_number}.",
+                "recommended_action": "Flag address on-chain." if is_suspicious else "No action required.",
                 "confidence_percentage": 94.0
             }
         })
@@ -93,14 +111,13 @@ def health_check():
 @app.get("/api/feed")
 def get_live_feed():
     try:
-        # Fetch real live Ethereum transactions from Mainnet
         txs = fetch_live_ethereum_transactions(limit=6)
         if txs:
             return txs
     except Exception as err:
         print(f"RPC fetch error: {err}")
 
-    # If RPC drops or throttles, dynamically generate unique pseudo-live transactions
+    # Fallback dynamic generator
     dynamic_feed = []
     base_block = 19420550 + random.randint(100, 9999)
     for _ in range(3):
@@ -137,22 +154,73 @@ def get_live_feed():
 
 @app.get("/api/graph/{address}")
 def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1, le=4)):
-    """Returns a full multi-node topological money flow tree formatted for React Flow."""
+    """Generates a deterministic multi-hop topological money flow tree for any wallet."""
     target = address.lower()
-    target_short = f"TARGET: {target[:6]}...{target[-4:]}"
 
-    # Build interconnected nodes with coordinates
+    # Seed PRNG with the address hash so each wallet generates a distinct, persistent graph
+    seed_int = int(hashlib.sha256(target.encode()).hexdigest()[:8], 16)
+    rng = random.Random(seed_int)
+
+    branch_count = rng.randint(2, 4)
+    sampled_protocols = rng.sample(PROTOCOLS_POOL, k=branch_count)
+
     nodes = [
-        {"id": target, "data": {"label": target_short}, "position": {"x": 260, "y": 40}},
-        {"id": "0xdac17f958d2ee523a2206206994597c13d831ec7", "data": {"label": "Tether USD (USDT)"}, "position": {"x": 60, "y": 180}},
-        {"id": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d", "data": {"label": "Uniswap V2 Router"}, "position": {"x": 280, "y": 180}},
-        {"id": "0xd90e2f925da726b50c4ed8d0fb90ad053324f31b", "data": {"label": "Tornado.Cash Cluster"}, "position": {"x": 500, "y": 180}}
+        {
+            "id": target,
+            "data": {"label": f"TARGET: {target[:6]}...{target[-4:]}"},
+            "position": {"x": 300, "y": 30}
+        }
     ]
+    edges = []
 
-    edges = [
-        {"id": "e1", "source": target, "target": "0xdac17f958d2ee523a2206206994597c13d831ec7", "label": "45.00 ETH"},
-        {"id": "e2", "source": target, "target": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d", "label": "12.50 ETH"},
-        {"id": "e3", "source": target, "target": "0xd90e2f925da726b50c4ed8d0fb90ad053324f31b", "label": "28.00 ETH"}
-    ]
+    # Position branches evenly across the X-axis
+    x_spacing = 600 / max(1, branch_count - 1) if branch_count > 1 else 300
+
+    for idx, proto in enumerate(sampled_protocols):
+        hop1_id = f"0x{hex(rng.getrandbits(160))[2:].zfill(40)}"
+        hop1_x = int(idx * x_spacing)
+        hop1_y = 170
+
+        nodes.append({
+            "id": hop1_id,
+            "data": {"label": proto["label"]},
+            "position": {"x": hop1_x, "y": hop1_y}
+        })
+
+        amt_1 = round(rng.uniform(0.8, 65.0), 2)
+        edges.append({
+            "id": f"e_root_{idx}",
+            "source": target,
+            "target": hop1_id,
+            "label": f"{amt_1} ETH"
+        })
+
+        # Add 1 or 2 downstream Layer 2 child nodes
+        sub_hops = rng.randint(1, 2)
+        for s_idx in range(sub_hops):
+            hop2_id = f"0x{hex(rng.getrandbits(160))[2:].zfill(40)}"
+            hop2_x = hop1_x + (s_idx * 130) - 40
+            hop2_y = 310
+
+            sub_label = rng.choice([
+                "Settled Inflow",
+                "Relay Wallet",
+                "Split Liquidity",
+                "Cold Storage",
+                "Bridge Contract"
+            ])
+            nodes.append({
+                "id": hop2_id,
+                "data": {"label": f"{sub_label} ({hop2_id[:4]}..{hop2_id[-4:]})"},
+                "position": {"x": hop2_x, "y": hop2_y}
+            })
+
+            amt_2 = round(amt_1 * rng.uniform(0.3, 0.95), 2)
+            edges.append({
+                "id": f"e_sub_{idx}_{s_idx}",
+                "source": hop1_id,
+                "target": hop2_id,
+                "label": f"{amt_2} ETH"
+            })
 
     return {"nodes": nodes, "edges": edges}
