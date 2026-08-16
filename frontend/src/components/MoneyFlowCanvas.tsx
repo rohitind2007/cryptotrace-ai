@@ -39,15 +39,21 @@ export default function MoneyFlowCanvas({ selectedAddress }: Props) {
               label: n.data?.label || `${n.id.slice(0, 6)}...${n.id.slice(-4)}`,
             },
             style: {
-              background: isTarget ? "#0f172a" : "#020617",
+              background: isTarget
+                ? "linear-gradient(135deg, #0f172a 0%, #1e0a1a 100%)"
+                : "rgba(2,6,23,0.9)",
               color: isTarget ? "#f43f5e" : "#22d3ee",
               border: isTarget ? "2px solid #f43f5e" : "1px solid rgba(255,255,255,0.18)",
-              borderRadius: "12px",
+              borderRadius: "14px",
               fontSize: "11px",
-              fontFamily: "monospace",
+              fontFamily: "'JetBrains Mono', monospace",
               padding: "10px 14px",
               cursor: "grab",
-              boxShadow: isTarget ? "0 0 16px rgba(244,63,94,0.3)" : "0 4px 12px rgba(0,0,0,0.5)",
+              boxShadow: isTarget
+                ? "0 0 20px rgba(244,63,94,0.35), 0 0 60px rgba(244,63,94,0.1), inset 0 1px 0 rgba(255,255,255,0.05)"
+                : "0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03)",
+              transition: "box-shadow 0.5s ease, transform 0.3s ease",
+              animation: isTarget ? "glow-pulse-rose 2.5s ease-in-out infinite" : undefined,
             },
           };
         });
@@ -59,12 +65,16 @@ export default function MoneyFlowCanvas({ selectedAddress }: Props) {
           label: e.label,
           type: "smoothstep",
           animated: true,
-          style: { stroke: "#22d3ee", strokeWidth: 1.5 },
+          style: {
+            stroke: "#22d3ee",
+            strokeWidth: 1.5,
+            filter: "drop-shadow(0 0 3px rgba(34,211,238,0.3))",
+          },
           markerEnd: { type: MarkerType.ArrowClosed, color: "#22d3ee" },
           labelStyle: {
             fill: "#22d3ee",
             fontSize: "10px",
-            fontFamily: "monospace",
+            fontFamily: "'JetBrains Mono', monospace",
             fontWeight: 600,
           },
           labelBgStyle: {
@@ -72,10 +82,10 @@ export default function MoneyFlowCanvas({ selectedAddress }: Props) {
             fillOpacity: 0.95,
             stroke: "rgba(34, 211, 238, 0.35)",
             strokeWidth: 1,
-            rx: 6,
-            ry: 6,
+            rx: 8,
+            ry: 8,
           },
-          labelBgPadding: [6, 8],
+          labelBgPadding: [6, 8] as [number, number],
         }));
 
         setNodes(computedNodes);
@@ -91,7 +101,7 @@ export default function MoneyFlowCanvas({ selectedAddress }: Props) {
       <div className="flex justify-between items-center px-4 py-2.5 border-b border-white/5 bg-white/[0.02] z-10">
         <div className="flex items-center gap-2">
           <GitFork size={13} className="text-cyber-cyan" />
-          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-cyber-cyan">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest gradient-text">
             Money Flow Engine
           </span>
         </div>
@@ -110,8 +120,10 @@ export default function MoneyFlowCanvas({ selectedAddress }: Props) {
       {/* Interactive Flow Canvas */}
       <div className="flex-1 w-full h-full relative bg-black/40">
         {loading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 text-xs font-mono text-cyber-cyan">
-            Tracing topology structure...
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60">
+            <span className="text-xs font-mono gradient-text animate-breathe">
+              Tracing topology structure...
+            </span>
           </div>
         )}
         <ReactFlow

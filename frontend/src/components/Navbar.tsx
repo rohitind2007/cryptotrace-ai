@@ -42,11 +42,11 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
     <header className="fixed top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-50 flex justify-between items-center px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 liquid-glass rounded-2xl md:rounded-full border border-white/10 max-w-[1600px] mx-auto backdrop-blur-xl shadow-2xl">
       {/* Brand Logo */}
       <div className="flex items-center gap-2.5 shrink-0">
-        <div className="p-1.5 sm:p-2 rounded-xl bg-cyan-500/10 text-cyber-cyan border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+        <div className="p-1.5 sm:p-2 rounded-xl bg-cyan-500/10 text-cyber-cyan border border-cyan-500/20 animate-glow-cyan">
           <Shield size={18} className="sm:w-5 sm:h-5" />
         </div>
         <span className="font-heading italic font-bold text-sm sm:text-lg tracking-wide text-white whitespace-nowrap">
-          CryptoTrace <span className="text-cyber-cyan">AI</span>
+          CryptoTrace <span className="gradient-text">AI</span>
         </span>
       </div>
 
@@ -54,10 +54,10 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
       <nav className="flex items-center gap-1 sm:gap-2 bg-black/40 p-1 sm:p-1.5 rounded-full border border-white/5">
         <button
           onClick={() => onSelectTab('terminal')}
-          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-all ${
+          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-all duration-300 ${
             activeTab === 'terminal'
-              ? 'bg-white/10 text-cyber-cyan border border-cyber-cyan/40 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-              : 'text-white/60 hover:text-white border border-transparent'
+              ? 'bg-white/10 text-cyber-cyan border border-cyber-cyan/40 glow-border-cyan'
+              : 'text-white/60 hover:text-white hover:bg-white/5 border border-transparent'
           }`}
         >
           <Terminal size={15} />
@@ -66,10 +66,10 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
 
         <button
           onClick={() => onSelectTab('investigation')}
-          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-all ${
+          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-all duration-300 ${
             activeTab === 'investigation'
-              ? 'bg-white/10 text-cyber-cyan border border-cyber-cyan/40 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-              : 'text-white/60 hover:text-white border border-transparent'
+              ? 'bg-white/10 text-cyber-cyan border border-cyber-cyan/40 glow-border-cyan'
+              : 'text-white/60 hover:text-white hover:bg-white/5 border border-transparent'
           }`}
         >
           <Globe size={15} />
@@ -78,10 +78,10 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
 
         <button
           onClick={() => onSelectTab('node')}
-          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-all ${
+          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-all duration-300 ${
             activeTab === 'node'
-              ? 'bg-white/10 text-cyber-cyan border border-cyber-cyan/40 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-              : 'text-white/60 hover:text-white border border-transparent'
+              ? 'bg-white/10 text-cyber-cyan border border-cyber-cyan/40 glow-border-cyan'
+              : 'text-white/60 hover:text-white hover:bg-white/5 border border-transparent'
           }`}
         >
           <Radio size={15} />
@@ -96,7 +96,7 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
           <button
             onClick={onOpenDatabase}
             title="Open Neon PostgreSQL Explorer"
-            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 transition-all text-xs font-mono group cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 transition-all duration-300 text-xs font-mono group cursor-pointer glow-border-cyan hover:scale-[1.03]"
           >
             <Database size={13} className="text-cyber-cyan group-hover:scale-110 transition-transform" />
             <span className="text-[10px] sm:text-xs font-bold hidden sm:inline">Neon SQL</span>
@@ -107,7 +107,7 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
         <button
           onClick={checkPing}
           title="Click to test live Ethereum RPC ping"
-          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-black/40 border border-white/10 hover:border-cyber-cyan/40 hover:bg-white/5 transition-all text-xs font-mono group cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-black/40 border border-white/10 hover:border-cyber-cyan/40 hover:bg-white/5 transition-all duration-300 text-xs font-mono group cursor-pointer hover:glow-border-cyan"
         >
           <Activity
             size={13}
@@ -124,7 +124,7 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
           </span>
           <RefreshCw
             size={11}
-            className={`text-white/30 group-hover:text-cyber-cyan ${isPinging ? 'animate-spin' : ''}`}
+            className={`text-white/30 group-hover:text-cyber-cyan transition-colors ${isPinging ? 'animate-spin' : ''}`}
           />
         </button>
 
@@ -136,7 +136,11 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
               {status ? 'ONLINE' : 'OFFLINE'}
             </span>
           </div>
-          <div className={`w-2.5 h-2.5 rounded-full ${status ? 'bg-emerald-400 animate-pulse ring-4 ring-emerald-400/20' : 'bg-rose-500 ring-4 ring-rose-500/20'}`} />
+          <div className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
+            status
+              ? 'bg-emerald-400 animate-pulse ring-4 ring-emerald-400/20 shadow-[0_0_12px_rgba(52,211,153,0.4)]'
+              : 'bg-rose-500 ring-4 ring-rose-500/20 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
+          }`} />
         </div>
       </div>
     </header>

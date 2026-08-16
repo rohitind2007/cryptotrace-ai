@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Database,
   X,
@@ -66,19 +67,27 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
   );
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="liquid-glass border border-white/10 w-full max-w-6xl max-h-[85vh] rounded-3xl flex flex-col shadow-2xl overflow-hidden bg-[#020617]/95">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 24 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 24 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+        className="liquid-glass border border-white/10 w-full max-w-6xl max-h-[85vh] rounded-3xl flex flex-col shadow-2xl overflow-hidden bg-[#020617]/95"
+      >
+        {/* Gradient accent line */}
+        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-cyber-cyan/50 to-transparent" />
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 animate-glow-cyan">
               <Database size={18} />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  Neon PostgreSQL Storage Explorer
+                  Neon PostgreSQL <span className="gradient-text">Storage Explorer</span>
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center gap-1">
                   <CheckCircle2 size={10} /> Table: flagged_transactions
@@ -95,21 +104,21 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
               href="https://console.neon.tech"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/10"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all duration-300 border border-white/10 hover:glow-border-cyan"
             >
               Neon Console <ExternalLink size={12} />
             </a>
             <button
               onClick={fetchRecords}
               disabled={loading}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/10 disabled:opacity-50"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all duration-300 border border-white/10 disabled:opacity-50 hover:glow-border-cyan"
               title="Refresh database records"
             >
               <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/5 hover:bg-rose-500/20 text-white/70 hover:text-rose-400 transition-all border border-white/10"
+              className="p-2 rounded-xl bg-white/5 hover:bg-rose-500/20 text-white/70 hover:text-rose-400 transition-all duration-300 border border-white/10"
             >
               <X size={15} />
             </button>
@@ -125,7 +134,7 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
               placeholder="Search hash, address, or threat category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50"
+              className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_12px_rgba(34,211,238,0.15)] transition-all duration-300"
             />
           </div>
           <div className="text-xs font-mono text-white/50 self-end sm:self-auto">
@@ -137,8 +146,10 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
         {/* Database Table */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {loading && records.length === 0 ? (
-            <div className="py-20 text-center text-xs font-mono text-cyan-400 animate-pulse">
-              Querying Neon PostgreSQL table...
+            <div className="py-20 text-center text-xs font-mono">
+              <span className="gradient-text animate-breathe inline-block">
+                Querying Neon PostgreSQL table...
+              </span>
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-20 text-center text-xs font-mono text-white/40">
@@ -162,13 +173,18 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
                   const isCrit = row.severity === "CRITICAL";
                   const isHigh = row.severity === "HIGH";
                   return (
-                    <tr key={row.tx_hash} className="hover:bg-white/[0.02] transition-colors">
+                    <tr
+                      key={row.tx_hash}
+                      className={`hover:bg-white/[0.02] transition-colors duration-300 ${
+                        isCrit ? 'hover:bg-rose-500/[0.04]' : ''
+                      }`}
+                    >
                       <td className="py-2.5 px-3">
                         <a
                           href={`https://etherscan.io/tx/${row.tx_hash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-cyan-400 hover:underline flex items-center gap-1"
+                          className="text-cyan-400 hover:underline flex items-center gap-1 hover:text-cyber-cyan transition-colors"
                         >
                           {row.tx_hash.slice(0, 8)}...{row.tx_hash.slice(-6)}
                           <ExternalLink size={10} />
@@ -183,9 +199,9 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                             isCrit
-                              ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                              ? "bg-rose-500/20 text-rose-400 border border-rose-500/30 shadow-[0_0_8px_rgba(244,63,94,0.2)]"
                               : isHigh
-                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-[0_0_8px_rgba(251,191,36,0.2)]"
                               : "bg-slate-800 text-slate-400 border border-white/5"
                           }`}
                         >
@@ -209,7 +225,7 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
           <span>Target Engine: SQLAlchemy + pg8000</span>
           <span>SSL Mode: Verified (TLSv1.3)</span>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
