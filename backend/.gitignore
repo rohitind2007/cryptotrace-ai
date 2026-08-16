@@ -1,36 +1,11 @@
-# Python virtual environment
-.venv/
-venv/
-env/
-ENV/
-
-# Python bytecode & cache
+.venv
+venv
+env
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Environment files & secrets
-.env
-.env.*
-*.env
-
-# SQLite & local database dumps
-*.sqlite
-*.sqlite3
+*.pyc
+*.pyo
+*.pyd
+.Python
 *.db
-
-# Build & packaging artifacts
-build/
-dist/
-*.egg-info/
-*.egg
-
-# Editor & OS files
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
+*.sqlite3
+.env
