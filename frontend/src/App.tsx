@@ -164,10 +164,10 @@ export default function App() {
         {/* Dot Grid */}
         <div className="absolute inset-0 dot-grid-bg opacity-40" />
 
-        {/* Floating Gradient Orbs */}
-        <div className="ambient-orb ambient-orb-cyan animate-float w-[500px] h-[500px] -top-40 -left-40" />
-        <div className="ambient-orb ambient-orb-rose animate-float-reverse w-[400px] h-[400px] top-1/3 -right-32" />
-        <div className="ambient-orb ambient-orb-violet animate-float w-[350px] h-[350px] bottom-20 left-1/4" style={{ animationDelay: "3s" }} />
+        {/* Floating Gradient Orbs — smaller sizes = less blur area = better FPS */}
+        <div className="ambient-orb ambient-orb-cyan animate-float w-[400px] h-[400px] -top-40 -left-40" />
+        <div className="ambient-orb ambient-orb-rose animate-float-reverse w-[300px] h-[300px] top-1/3 -right-32" />
+        <div className="ambient-orb ambient-orb-violet animate-float w-[250px] h-[250px] bottom-20 left-1/4" style={{ animationDelay: "3s" }} />
       </div>
 
       {/* Floating Navigation Pill */}
@@ -221,7 +221,7 @@ export default function App() {
           </motion.div>
 
           {/* Card 4: High Risk Flags */}
-          <motion.div variants={fadeSlideUp} className={`liquid-glass p-3.5 rounded-2xl border flex flex-col justify-between group transition-shadow duration-500 ${highRiskCount > 0 ? 'border-cyber-rose/20 animate-glow-rose' : 'border-white/5'}`}>
+          <motion.div variants={fadeSlideUp} className={`liquid-glass p-3.5 rounded-2xl border flex flex-col justify-between group transition-shadow duration-500 ${highRiskCount > 0 ? 'border-cyber-rose/20 glow-border-rose' : 'border-white/5'}`}>
             <div className="flex justify-between items-center text-white/40 mb-1">
               <span className="text-[9px] font-mono uppercase tracking-widest">Threat Detections</span>
               <ShieldAlert size={13} className="text-cyber-rose group-hover:animate-breathe" />
@@ -328,7 +328,7 @@ export default function App() {
                 </h3>
                 <p className="text-xs text-white/40 font-mono mt-0.5">Real-time architecture telemetry for Ethereum ingestion</p>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono animate-glow-cyan">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-mono glow-border-cyan">
                 <CheckCircle2 size={12} /> ALL SYSTEMS OPERATIONAL
               </span>
             </div>

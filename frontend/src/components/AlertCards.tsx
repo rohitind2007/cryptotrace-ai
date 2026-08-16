@@ -35,11 +35,11 @@ export default function AlertCards({ alerts, onSelectAlert }: AlertCardsProps) {
                 damping: 20,
               }}
               onClick={() => onSelectAlert(alert)}
-              className={`liquid-glass p-4 rounded-[1.25rem] border-l-2 relative group cursor-pointer transition-all duration-300 hover:scale-[1.02] gradient-border-sweep
+              className={`liquid-glass p-4 rounded-[1.25rem] border-l-2 relative group cursor-pointer transition-all duration-300 gradient-border-sweep
                 ${isCritical
-                  ? "border-l-cyber-rose animate-glow-rose"
+                  ? "border-l-cyber-rose glow-border-rose"
                   : isHigh
-                  ? "border-l-orange-500 animate-glow-amber"
+                  ? "border-l-orange-500 glow-border-amber"
                   : "border-l-cyber-cyan hover:glow-border-cyan"
                 }`}
             >

@@ -39,10 +39,10 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
   }, [checkPing]);
 
   return (
-    <header className="fixed top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-50 flex justify-between items-center px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 liquid-glass rounded-2xl md:rounded-full border border-white/10 max-w-[1600px] mx-auto backdrop-blur-xl shadow-2xl">
+    <header className="fixed top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-50 flex justify-between items-center px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 liquid-glass rounded-2xl md:rounded-full border border-white/10 max-w-[1600px] mx-auto shadow-2xl">
       {/* Brand Logo */}
       <div className="flex items-center gap-2.5 shrink-0">
-        <div className="p-1.5 sm:p-2 rounded-xl bg-cyan-500/10 text-cyber-cyan border border-cyan-500/20 animate-glow-cyan">
+        <div className="p-1.5 sm:p-2 rounded-xl bg-cyan-500/10 text-cyber-cyan border border-cyan-500/20 glow-border-cyan">
           <Shield size={18} className="sm:w-5 sm:h-5" />
         </div>
         <span className="font-heading italic font-bold text-sm sm:text-lg tracking-wide text-white whitespace-nowrap">

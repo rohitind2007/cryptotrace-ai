@@ -50,10 +50,8 @@ export default function MoneyFlowCanvas({ selectedAddress }: Props) {
               padding: "10px 14px",
               cursor: "grab",
               boxShadow: isTarget
-                ? "0 0 20px rgba(244,63,94,0.35), 0 0 60px rgba(244,63,94,0.1), inset 0 1px 0 rgba(255,255,255,0.05)"
-                : "0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03)",
-              transition: "box-shadow 0.5s ease, transform 0.3s ease",
-              animation: isTarget ? "glow-pulse-rose 2.5s ease-in-out infinite" : undefined,
+                ? "0 0 16px rgba(244,63,94,0.3), inset 0 1px 0 rgba(255,255,255,0.05)"
+                : "0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03)",
             },
           };
         });
@@ -68,7 +66,6 @@ export default function MoneyFlowCanvas({ selectedAddress }: Props) {
           style: {
             stroke: "#22d3ee",
             strokeWidth: 1.5,
-            filter: "drop-shadow(0 0 3px rgba(34,211,238,0.3))",
           },
           markerEnd: { type: MarkerType.ArrowClosed, color: "#22d3ee" },
           labelStyle: {

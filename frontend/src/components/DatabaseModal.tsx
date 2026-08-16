@@ -81,7 +81,7 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 animate-glow-cyan">
+            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 glow-border-cyan">
               <Database size={18} />
             </div>
             <div>

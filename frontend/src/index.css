@@ -15,15 +15,17 @@
 
 /* ─── Component Utilities ─── */
 @layer components {
-  /* Enhanced Liquid Glass */
+  /*
+   * PERF: Reduced backdrop-blur from 16px → 8px.
+   * backdrop-filter is the #1 FPS killer when stacked on many elements.
+   */
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.04),
-      0 4px 24px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    contain: layout style;
   }
 
   /* Gradient Text — Cyan → Violet */
@@ -42,58 +44,62 @@
     background-clip: text;
   }
 
-  /* Glow Border Utilities */
+  /*
+   * PERF: Static glow borders (no animation). Animate via opacity on the
+   * element itself if needed — never animate box-shadow directly.
+   */
   .glow-border-cyan {
-    box-shadow:
-      0 0 8px rgba(34, 211, 238, 0.15),
-      0 0 24px rgba(34, 211, 238, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
   }
 
   .glow-border-rose {
-    box-shadow:
-      0 0 8px rgba(244, 63, 94, 0.2),
-      0 0 24px rgba(244, 63, 94, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.2);
   }
 
   .glow-border-amber {
-    box-shadow:
-      0 0 8px rgba(251, 191, 36, 0.15),
-      0 0 24px rgba(251, 191, 36, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.15);
   }
 }
 
-/* ─── Ambient Gradient Orbs ─── */
+/*
+ * ─── Ambient Gradient Orbs ───
+ * PERF: Reduced blur from 100px → 60px. Using solid color with opacity
+ * instead of radial-gradient to reduce paint cost. GPU-promoted with
+ * will-change and translate3d.
+ */
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.12;
+  filter: blur(60px);
+  opacity: 0.08;
   pointer-events: none;
   will-change: transform;
+  transform: translate3d(0, 0, 0);
+  contain: strict;
 }
 
 .ambient-orb-cyan {
-  background: radial-gradient(circle, #22d3ee 0%, transparent 70%);
+  background: #22d3ee;
 }
 
 .ambient-orb-rose {
-  background: radial-gradient(circle, #f43f5e 0%, transparent 70%);
+  background: #f43f5e;
 }
 
 .ambient-orb-violet {
-  background: radial-gradient(circle, #a78bfa 0%, transparent 70%);
+  background: #a78bfa;
 }
 
 /* ─── Dot Grid Background ─── */
 .dot-grid-bg {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-/* ─── Scan Line Overlay ─── */
+/*
+ * ─── Scan Line Overlay ───
+ * PERF: Uses transform only (compositor-friendly). Will-change limited.
+ */
 .scan-line-overlay {
   position: relative;
   overflow: hidden;
@@ -103,41 +109,59 @@
   content: "";
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(34, 211, 238, 0.04) 45%,
-    rgba(34, 211, 238, 0.08) 50%,
-    rgba(34, 211, 238, 0.04) 55%,
+    rgba(34, 211, 238, 0.04) 48%,
+    rgba(34, 211, 238, 0.07) 50%,
+    rgba(34, 211, 238, 0.04) 52%,
     transparent 100%
   );
+  will-change: transform;
   animation: scan-line 4s ease-in-out infinite;
   pointer-events: none;
 }
 
-/* ─── Shimmer Effect ─── */
+/*
+ * ─── Shimmer Effect ───
+ * PERF: Uses transform instead of background-position for GPU compositing.
+ */
 .shimmer-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-bg::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(34, 211, 238, 0.06) 40%,
-    rgba(34, 211, 238, 0.12) 50%,
-    rgba(34, 211, 238, 0.06) 60%,
+    rgba(34, 211, 238, 0.08) 50%,
     transparent 100%
   );
-  background-size: 200% 100%;
+  will-change: transform;
   animation: shimmer 2.5s linear infinite;
+  pointer-events: none;
 }
 
 /* ─── Row Flash for New Entries ─── */
 .row-flash-new {
-  animation: row-flash 2.5s ease-out forwards;
+  animation: row-flash 2s ease-out forwards;
 }
 
-/* ─── Gradient Animated Border ─── */
+/*
+ * ─── Gradient Animated Border ───
+ * PERF: Only activates on hover (not continuously running).
+ * Uses opacity transition instead of continuous shimmer animation.
+ */
 .gradient-border-sweep {
   position: relative;
 }
@@ -151,10 +175,9 @@
   background: linear-gradient(
     90deg,
     rgba(34, 211, 238, 0.0) 0%,
-    rgba(34, 211, 238, 0.4) 50%,
+    rgba(34, 211, 238, 0.35) 50%,
     rgba(34, 211, 238, 0.0) 100%
   );
-  background-size: 200% 100%;
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
@@ -167,7 +190,6 @@
 
 .gradient-border-sweep:hover::before {
   opacity: 1;
-  animation: shimmer 1.5s linear infinite;
 }
 
 /* ─── Custom Sleek Dark Scrollbar ─── */
@@ -192,4 +214,26 @@
 /* ─── React Flow Custom Overrides ─── */
 .react-flow__attribution {
   display: none !important;
+}
+
+/*
+ * ─── Reduced Motion ───
+ * Disable all heavy animations for users who prefer reduced motion,
+ * or on underpowered devices.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .ambient-orb {
+    display: none;
+  }
+
+  .scan-line-overlay::after,
+  .shimmer-bg::after {
+    display: none;
+  }
 }

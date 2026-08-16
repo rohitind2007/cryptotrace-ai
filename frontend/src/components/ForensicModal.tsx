@@ -100,7 +100,7 @@ export default function ForensicModal({ tx, onClose }: Props) {
 
             <div className="space-y-4">
               <div className={`p-5 liquid-glass rounded-3xl border ${
-                tx.risk_score >= 70 ? 'border-cyber-rose/20 animate-glow-rose' : 'border-white/5'
+                tx.risk_score >= 70 ? 'border-cyber-rose/20 glow-border-rose' : 'border-white/5'
               } bg-cyber-rose/5`}>
                 <div className="flex items-center gap-2 text-cyber-rose mb-2">
                   <ShieldAlert size={18} className={tx.risk_score >= 70 ? 'animate-breathe' : ''} />
