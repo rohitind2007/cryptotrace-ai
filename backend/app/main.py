@@ -154,32 +154,34 @@ def get_live_feed():
 
 @app.get("/api/graph/{address}")
 def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1, le=4)):
-    """Generates a deterministic multi-hop topological money flow tree for any wallet."""
+    """Generates a non-overlapping deterministic multi-hop topological money flow tree."""
     target = address.lower()
 
-    # Seed PRNG with the address hash so each wallet generates a distinct, persistent graph
+    # Deterministic random generator per wallet
     seed_int = int(hashlib.sha256(target.encode()).hexdigest()[:8], 16)
     rng = random.Random(seed_int)
 
-    branch_count = rng.randint(2, 4)
+    branch_count = rng.randint(2, 3)
     sampled_protocols = rng.sample(PROTOCOLS_POOL, k=branch_count)
 
+    # Root Target Node (Top Center)
     nodes = [
         {
             "id": target,
             "data": {"label": f"TARGET: {target[:6]}...{target[-4:]}"},
-            "position": {"x": 300, "y": 30}
+            "position": {"x": 350, "y": 20}
         }
     ]
     edges = []
 
-    # Position branches evenly across the X-axis
-    x_spacing = 600 / max(1, branch_count - 1) if branch_count > 1 else 300
+    # Calculate wide horizontal spacing to eliminate overlaps
+    column_width = 320
+    start_x = 350 - ((branch_count - 1) * column_width) / 2
 
     for idx, proto in enumerate(sampled_protocols):
         hop1_id = f"0x{hex(rng.getrandbits(160))[2:].zfill(40)}"
-        hop1_x = int(idx * x_spacing)
-        hop1_y = 170
+        hop1_x = int(start_x + (idx * column_width))
+        hop1_y = 160
 
         nodes.append({
             "id": hop1_id,
@@ -187,7 +189,7 @@ def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1,
             "position": {"x": hop1_x, "y": hop1_y}
         })
 
-        amt_1 = round(rng.uniform(0.8, 65.0), 2)
+        amt_1 = round(rng.uniform(1.2, 55.0), 2)
         edges.append({
             "id": f"e_root_{idx}",
             "source": target,
@@ -195,11 +197,12 @@ def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1,
             "label": f"{amt_1} ETH"
         })
 
-        # Add 1 or 2 downstream Layer 2 child nodes
+        # Add Layer 2 Downstream Children
         sub_hops = rng.randint(1, 2)
         for s_idx in range(sub_hops):
             hop2_id = f"0x{hex(rng.getrandbits(160))[2:].zfill(40)}"
-            hop2_x = hop1_x + (s_idx * 130) - 40
+            # Offset children cleanly below parent
+            hop2_x = hop1_x + (s_idx * 160) - (80 if sub_hops > 1 else 0)
             hop2_y = 310
 
             sub_label = rng.choice([
@@ -215,7 +218,7 @@ def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1,
                 "position": {"x": hop2_x, "y": hop2_y}
             })
 
-            amt_2 = round(amt_1 * rng.uniform(0.3, 0.95), 2)
+            amt_2 = round(amt_1 * rng.uniform(0.35, 0.9), 2)
             edges.append({
                 "id": f"e_sub_{idx}_{s_idx}",
                 "source": hop1_id,
