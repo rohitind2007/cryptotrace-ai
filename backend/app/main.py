@@ -3,11 +3,13 @@ import random
 import hashlib
 import datetime
 import requests
+import ssl
+from urllib.parse import urlparse, parse_qs, urlunparse
 from typing import List, Optional
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-# Safe import for SQLAlchemy to guarantee zero 500 runtime crashes
+# Safe import for SQLAlchemy
 try:
     from sqlalchemy import create_engine, Column, String, Float, Integer, Boolean, DateTime
     from sqlalchemy.orm import declarative_base, sessionmaker
@@ -21,18 +23,30 @@ except ImportError:
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = None
 SessionLocal = None
+db_error_message = None
 
 if HAS_SQLALCHEMY and DATABASE_URL:
     try:
-        db_url = DATABASE_URL
-        # Route connection through the pure-Python pg8000 driver
-        if db_url.startswith("postgres://"):
-            db_url = db_url.replace("postgres://", "postgresql+pg8000://", 1)
-        elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+pg8000://"):
-            db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
+        raw_url = DATABASE_URL.strip()
+
+        # Convert dialect prefix to postgresql+pg8000
+        if raw_url.startswith("postgres://"):
+            raw_url = raw_url.replace("postgres://", "postgresql+pg8000://", 1)
+        elif raw_url.startswith("postgresql://") and not raw_url.startswith("postgresql+pg8000://"):
+            raw_url = raw_url.replace("postgresql://", "postgresql+pg8000://", 1)
+
+        # Strip ?sslmode= query param to prevent pg8000 driver exceptions
+        parsed = urlparse(raw_url)
+        clean_url = urlunparse((parsed.scheme, parsed.netloc, parsed.path, '', '', ''))
+
+        # Create SSL context for Neon cloud connection
+        ssl_ctx = ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
 
         engine = create_engine(
-            db_url,
+            clean_url,
+            connect_args={"ssl_context": ssl_ctx, "timeout": 10},
             pool_pre_ping=True,
             pool_recycle=300
         )
@@ -56,11 +70,12 @@ if HAS_SQLALCHEMY and DATABASE_URL:
 
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         Base.metadata.create_all(bind=engine)
-        print("[DB Success] PostgreSQL successfully initialized.")
     except Exception as e:
-        print(f"[DB Notice] Running without SQL storage: {e}")
+        db_error_message = str(e)
         engine = None
         SessionLocal = None
+elif not DATABASE_URL:
+    db_error_message = "DATABASE_URL environment variable is missing"
 
 
 def save_transactions_to_db(tx_list: list):
@@ -90,7 +105,6 @@ def save_transactions_to_db(tx_list: list):
         db.commit()
     except Exception as e:
         db.rollback()
-        print(f"[DB Error] {e}")
     finally:
         db.close()
 
@@ -134,7 +148,6 @@ PROTOCOLS_POOL = [
 
 
 def fetch_live_ethereum_transactions(limit=6):
-    """Fetches real block transactions directly via Ethereum JSON-RPC."""
     payload = {
         "jsonrpc": "2.0",
         "method": "eth_getBlockByNumber",
@@ -196,7 +209,8 @@ def health_check():
         "chain": "Ethereum Mainnet",
         "ai_engine": "IsolationForest Heuristics + Gemini Synthesizer",
         "mode": "live-rpc",
-        "database": "connected" if SessionLocal else "serverless-in-memory"
+        "database": "connected" if SessionLocal else "serverless-in-memory",
+        "db_debug": db_error_message
     }
 
 
@@ -208,7 +222,7 @@ def get_live_feed():
             save_transactions_to_db(txs)
             return txs
     except Exception as err:
-        print(f"[RPC Notice] Fallback triggered: {err}")
+        pass
 
     dynamic_feed = []
     base_block = 19420550 + random.randint(100, 9999)
@@ -243,6 +257,33 @@ def get_live_feed():
         })
     save_transactions_to_db(dynamic_feed)
     return dynamic_feed
+
+
+@app.get("/api/history")
+def get_historical_transactions(limit: int = Query(default=25, ge=1, le=100)):
+    if not SessionLocal:
+        return {"status": "Database in memory mode", "records": []}
+    db = SessionLocal()
+    try:
+        records = db.query(FlaggedTransaction).order_by(FlaggedTransaction.created_at.desc()).limit(limit).all()
+        return [
+            {
+                "tx_hash": r.tx_hash,
+                "block_number": r.block_number,
+                "from": r.from_address,
+                "to": r.to_address,
+                "value_eth": r.value_eth,
+                "gas_price_gwei": r.gas_price_gwei,
+                "risk_score": r.risk_score,
+                "severity": r.severity,
+                "threat_category": r.threat_category,
+                "is_suspicious": r.is_suspicious,
+                "timestamp": r.created_at.isoformat() if r.created_at else None
+            }
+            for r in records
+        ]
+    finally:
+        db.close()
 
 
 @app.get("/api/graph/{address}")
