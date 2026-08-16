@@ -4,7 +4,7 @@ import hashlib
 import datetime
 import requests
 import ssl
-from urllib.parse import urlparse, parse_qs, urlunparse
+from urllib.parse import urlparse, urlunparse
 from typing import List, Optional
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,7 +35,7 @@ if HAS_SQLALCHEMY and DATABASE_URL:
         elif raw_url.startswith("postgresql://") and not raw_url.startswith("postgresql+pg8000://"):
             raw_url = raw_url.replace("postgresql://", "postgresql+pg8000://", 1)
 
-        # Strip ?sslmode= query param to prevent pg8000 driver exceptions
+        # Strip query parameters for pg8000 driver
         parsed = urlparse(raw_url)
         clean_url = urlunparse((parsed.scheme, parsed.netloc, parsed.path, '', '', ''))
 
@@ -64,7 +64,7 @@ if HAS_SQLALCHEMY and DATABASE_URL:
             risk_score = Column(Integer)
             severity = Column(String(20))
             threat_category = Column(String(100))
-            is_suspicious = Column(Boolean, default=False)
+            is_suspicious = Column(Boolean, default=True)
             created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 
@@ -79,13 +79,22 @@ elif not DATABASE_URL:
 
 
 def save_transactions_to_db(tx_list: list):
-    """Safely saves transactions into PostgreSQL if configured."""
+    """Persists ONLY flagged and suspicious transactions into PostgreSQL."""
     if not SessionLocal or not tx_list:
         return
+
+    flagged_txs = [
+        tx for tx in tx_list
+        if isinstance(tx, dict) and (tx.get("is_suspicious") or int(tx.get("risk_score", 0)) >= 60)
+    ]
+
+    if not flagged_txs:
+        return
+
     db = SessionLocal()
     try:
-        for tx in tx_list:
-            if not isinstance(tx, dict) or not tx.get("tx_hash"):
+        for tx in flagged_txs:
+            if not tx.get("tx_hash"):
                 continue
             existing = db.query(FlaggedTransaction).filter(FlaggedTransaction.tx_hash == tx["tx_hash"]).first()
             if not existing:
@@ -97,14 +106,16 @@ def save_transactions_to_db(tx_list: list):
                     value_eth=float(tx.get("value_eth", 0.0)),
                     gas_price_gwei=float(tx.get("gas_price_gwei", 0.0)),
                     risk_score=int(tx.get("risk_score", 0)),
-                    severity=tx.get("severity", "LOW"),
-                    threat_category=tx.get("ai_forensic_dossier", {}).get("threat_category", "Standard Transaction"),
-                    is_suspicious=bool(tx.get("is_suspicious", False))
+                    severity=tx.get("severity", "HIGH"),
+                    threat_category=tx.get("ai_forensic_dossier", {}).get("threat_category",
+                                                                          "Sanctioned Entity Outflow"),
+                    is_suspicious=True
                 )
                 db.add(record)
         db.commit()
     except Exception as e:
         db.rollback()
+        print(f"[DB Error] Failed to persist record: {e}")
     finally:
         db.close()
 
@@ -260,12 +271,18 @@ def get_live_feed():
 
 
 @app.get("/api/history")
-def get_historical_transactions(limit: int = Query(default=25, ge=1, le=100)):
+def get_historical_transactions(limit: int = Query(default=50, ge=1, le=100)):
+    """Retrieves only flagged audit history from PostgreSQL."""
     if not SessionLocal:
         return {"status": "Database in memory mode", "records": []}
     db = SessionLocal()
     try:
-        records = db.query(FlaggedTransaction).order_by(FlaggedTransaction.created_at.desc()).limit(limit).all()
+        records = (
+            db.query(FlaggedTransaction)
+            .order_by(FlaggedTransaction.created_at.desc())
+            .limit(limit)
+            .all()
+        )
         return [
             {
                 "tx_hash": r.tx_hash,
