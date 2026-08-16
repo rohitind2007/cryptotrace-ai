@@ -143,7 +143,7 @@ export default function App() {
   );
 
   const highRiskCount = useMemo(
-    () => transactions.filter((t) => (t.risk_score || 0) >= 60).length,
+    () => transactions.filter((t) => t.is_suspicious || (t.risk_score || 0) >= 60).length,
     [transactions]
   );
 
@@ -164,7 +164,7 @@ export default function App() {
         {/* Dot Grid */}
         <div className="absolute inset-0 dot-grid-bg opacity-40" />
 
-        {/* Floating Gradient Orbs — smaller sizes = less blur area = better FPS */}
+        {/* Floating Gradient Orbs */}
         <div className="ambient-orb ambient-orb-cyan animate-float w-[400px] h-[400px] -top-40 -left-40" />
         <div className="ambient-orb ambient-orb-rose animate-float-reverse w-[300px] h-[300px] top-1/3 -right-32" />
         <div className="ambient-orb ambient-orb-violet animate-float w-[250px] h-[250px] bottom-20 left-1/4" style={{ animationDelay: "3s" }} />
