@@ -25,14 +25,16 @@ SessionLocal = None
 if HAS_SQLALCHEMY and DATABASE_URL:
     try:
         db_url = DATABASE_URL
+        # Route connection through the pure-Python pg8000 driver
         if db_url.startswith("postgres://"):
-            db_url = db_url.replace("postgres://", "postgresql://", 1)
+            db_url = db_url.replace("postgres://", "postgresql+pg8000://", 1)
+        elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+pg8000://"):
+            db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
 
         engine = create_engine(
             db_url,
             pool_pre_ping=True,
-            pool_recycle=300,
-            connect_args={"connect_timeout": 5}
+            pool_recycle=300
         )
 
 
@@ -54,6 +56,7 @@ if HAS_SQLALCHEMY and DATABASE_URL:
 
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         Base.metadata.create_all(bind=engine)
+        print("[DB Success] PostgreSQL successfully initialized.")
     except Exception as e:
         print(f"[DB Notice] Running without SQL storage: {e}")
         engine = None
