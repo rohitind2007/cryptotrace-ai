@@ -1,12 +1,82 @@
 import os
 import random
 import hashlib
+import datetime
 import requests
 from typing import List, Optional
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from app.services.graph_service import graph_service
+from sqlalchemy import create_engine, Column, String, Float, Integer, Boolean, DateTime
+from sqlalchemy.orm import declarative_base, sessionmaker
 
+# -----------------------------------------------------------------------------
+# Database Setup (PostgreSQL / Neon / Supabase)
+# -----------------------------------------------------------------------------
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+Base = declarative_base()
+
+class FlaggedTransaction(Base):
+    __tablename__ = "flagged_transactions"
+
+    tx_hash = Column(String(66), primary_key=True, index=True)
+    block_number = Column(Integer)
+    from_address = Column(String(42), index=True)
+    to_address = Column(String(42))
+    value_eth = Column(Float)
+    gas_price_gwei = Column(Float)
+    risk_score = Column(Integer)
+    severity = Column(String(20))
+    threat_category = Column(String(100))
+    is_suspicious = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+engine = None
+SessionLocal = None
+
+if DATABASE_URL:
+    try:
+        # Standardize connection string format for SQLAlchemy
+        if DATABASE_URL.startswith("postgres://"):
+            DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Database initialization notice: {e}")
+
+def save_transactions_to_db(tx_list: list):
+    """Persists transactions safely into PostgreSQL."""
+    if not SessionLocal or not tx_list:
+        return
+    db = SessionLocal()
+    try:
+        for tx in tx_list:
+            existing = db.query(FlaggedTransaction).filter(FlaggedTransaction.tx_hash == tx["tx_hash"]).first()
+            if not existing:
+                record = FlaggedTransaction(
+                    tx_hash=tx["tx_hash"],
+                    block_number=tx.get("block_number"),
+                    from_address=tx.get("from"),
+                    to_address=tx.get("to"),
+                    value_eth=float(tx.get("value_eth", 0.0)),
+                    gas_price_gwei=float(tx.get("gas_price_gwei", 0.0)),
+                    risk_score=int(tx.get("risk_score", 0)),
+                    severity=tx.get("severity", "LOW"),
+                    threat_category=tx.get("ai_forensic_dossier", {}).get("threat_category", "Standard Transaction"),
+                    is_suspicious=bool(tx.get("is_suspicious", False))
+                )
+                db.add(record)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"DB insertion error: {e}")
+    finally:
+        db.close()
+
+# -----------------------------------------------------------------------------
+# FastAPI App Config
+# -----------------------------------------------------------------------------
 app = FastAPI(
     title="Ethereum AML & Fraud Sentinel Core API",
     version="1.0.0",
@@ -97,22 +167,22 @@ def fetch_live_ethereum_transactions(limit=6):
         })
     return results
 
-
 @app.get("/api/health")
 def health_check():
     return {
         "status": "healthy",
         "chain": "Ethereum Mainnet",
         "ai_engine": "IsolationForest + Google Gemini",
-        "mode": "live-rpc"
+        "mode": "live-rpc",
+        "database": "connected" if SessionLocal else "unconfigured"
     }
-
 
 @app.get("/api/feed")
 def get_live_feed():
     try:
         txs = fetch_live_ethereum_transactions(limit=6)
         if txs:
+            save_transactions_to_db(txs)
             return txs
     except Exception as err:
         print(f"RPC fetch error: {err}")
@@ -149,22 +219,52 @@ def get_live_feed():
                 "confidence_percentage": 92.5
             }
         })
+    save_transactions_to_db(dynamic_feed)
     return dynamic_feed
 
+@app.get("/api/history")
+def get_historical_transactions(limit: int = Query(default=25, ge=1, le=100)):
+    """Retrieves persisted audit history for cybercrime and fraud investigators."""
+    if not SessionLocal:
+        return {"status": "Database not configured", "records": []}
+    db = SessionLocal()
+    try:
+        records = (
+            db.query(FlaggedTransaction)
+            .order_by(FlaggedTransaction.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+        return [
+            {
+                "tx_hash": r.tx_hash,
+                "block_number": r.block_number,
+                "from": r.from_address,
+                "to": r.to_address,
+                "value_eth": r.value_eth,
+                "gas_price_gwei": r.gas_price_gwei,
+                "risk_score": r.risk_score,
+                "severity": r.severity,
+                "threat_category": r.threat_category,
+                "is_suspicious": r.is_suspicious,
+                "timestamp": r.created_at.isoformat() if r.created_at else None
+            }
+            for r in records
+        ]
+    finally:
+        db.close()
 
 @app.get("/api/graph/{address}")
 def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1, le=4)):
     """Generates a non-overlapping deterministic multi-hop topological money flow tree."""
     target = address.lower()
 
-    # Deterministic random generator per wallet
     seed_int = int(hashlib.sha256(target.encode()).hexdigest()[:8], 16)
     rng = random.Random(seed_int)
 
     branch_count = rng.randint(2, 3)
     sampled_protocols = rng.sample(PROTOCOLS_POOL, k=branch_count)
 
-    # Root Target Node (Top Center)
     nodes = [
         {
             "id": target,
@@ -174,7 +274,6 @@ def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1,
     ]
     edges = []
 
-    # Calculate wide horizontal spacing to eliminate overlaps
     column_width = 320
     start_x = 350 - ((branch_count - 1) * column_width) / 2
 
@@ -197,11 +296,9 @@ def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1,
             "label": f"{amt_1} ETH"
         })
 
-        # Add Layer 2 Downstream Children
         sub_hops = rng.randint(1, 2)
         for s_idx in range(sub_hops):
             hop2_id = f"0x{hex(rng.getrandbits(160))[2:].zfill(40)}"
-            # Offset children cleanly below parent
             hop2_x = hop1_x + (s_idx * 160) - (80 if sub_hops > 1 else 0)
             hop2_y = 310
 
