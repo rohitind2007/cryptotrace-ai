@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Shield, Terminal, Globe, Radio, Activity, RefreshCw } from 'lucide-react';
+import { Shield, Terminal, Globe, Radio, Activity, RefreshCw, Database } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: 'terminal' | 'investigation' | 'node';
   onSelectTab: (tab: 'terminal' | 'investigation' | 'node') => void;
   status: boolean;
+  onOpenDatabase?: () => void;
 }
 
-export default function Navbar({ activeTab, onSelectTab, status }: NavbarProps) {
+export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase }: NavbarProps) {
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [isPinging, setIsPinging] = useState<boolean>(false);
 
@@ -49,7 +50,7 @@ export default function Navbar({ activeTab, onSelectTab, status }: NavbarProps) 
         </span>
       </div>
 
-      {/* Larger Desktop Navigation Tabs */}
+      {/* Center Navigation Tabs */}
       <nav className="flex items-center gap-1 sm:gap-2 bg-black/40 p-1 sm:p-1.5 rounded-full border border-white/5">
         <button
           onClick={() => onSelectTab('terminal')}
@@ -88,8 +89,20 @@ export default function Navbar({ activeTab, onSelectTab, status }: NavbarProps) 
         </button>
       </nav>
 
-      {/* Right Controls: Interactive Ping Badge + Status */}
-      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+      {/* Right Controls: Database Explorer + Ping Badge + Status */}
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* Neon SQL Table Explorer Button */}
+        {onOpenDatabase && (
+          <button
+            onClick={onOpenDatabase}
+            title="Open Neon PostgreSQL Explorer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 transition-all text-xs font-mono group cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+          >
+            <Database size={13} className="text-cyber-cyan group-hover:scale-110 transition-transform" />
+            <span className="text-[10px] sm:text-xs font-bold hidden sm:inline">Neon SQL</span>
+          </button>
+        )}
+
         {/* Interactive Ping Response Button */}
         <button
           onClick={checkPing}

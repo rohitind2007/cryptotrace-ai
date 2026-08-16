@@ -4,6 +4,7 @@ import LiveFeedTable from "./components/LiveFeedTable";
 import AlertCards from "./components/AlertCards";
 import MoneyFlowCanvas from "./components/MoneyFlowCanvas";
 import ForensicModal from "./components/ForensicModal";
+import DatabaseModal from "./components/DatabaseModal";
 import { TransactionPayload } from "./types";
 import {
   Activity,
@@ -13,7 +14,6 @@ import {
   Flame,
   Layers,
   Terminal as TerminalIcon,
-  Radio,
   CheckCircle2
 } from "lucide-react";
 
@@ -22,13 +22,14 @@ export default function App() {
   const [alerts, setAlerts] = useState<TransactionPayload[]>([]);
   const [selectedTx, setSelectedTx] = useState<TransactionPayload | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'terminal' | 'trace' | 'investigation' | 'node'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'investigation' | 'node'>('terminal');
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isDbModalOpen, setIsDbModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
 
-    // Check overall server health
+    // Check server & database health
     const checkHealth = async () => {
       try {
         const res = await fetch("/api/health");
@@ -36,7 +37,7 @@ export default function App() {
           setIsConnected(true);
         }
       } catch {
-        // Fall through to feed check
+        // Handled in feed poll fallback
       }
     };
 
@@ -97,7 +98,7 @@ export default function App() {
     setSelectedAddress(tx.from);
   }, []);
 
-  // Compute live real-time HUD telemetry
+  // Live HUD telemetry metrics
   const totalVolume = useMemo(
     () => transactions.reduce((acc, t) => acc + (Number(t.value_eth) || 0), 0),
     [transactions]
@@ -117,18 +118,15 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col font-sans relative overflow-x-hidden selection:bg-cyber-cyan/30">
       {/* Floating Navigation Pill */}
-      <div className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
-        <div className="pointer-events-auto w-full max-w-7xl">
-          <Navbar
-            activeTab={activeTab as any}
-            onSelectTab={setActiveTab as any}
-            status={isConnected}
-          />
-        </div>
-      </div>
+      <Navbar
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        status={isConnected}
+        onOpenDatabase={() => setIsDbModalOpen(true)}
+      />
 
-      {/* Main Workspace with pt-28 spacing to prevent header cutoff */}
-      <main className="flex-1 max-w-[1600px] mx-auto w-full px-3 sm:px-6 lg:px-8 pt-28 pb-8 flex flex-col gap-4">
+      {/* Main Workspace with top padding for fixed navbar clearance */}
+      <main className="flex-1 max-w-[1600px] mx-auto w-full px-3 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-8 flex flex-col gap-4">
         {/* Top Telemetry HUD Grid */}
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
           {/* Card 1: Block Height */}
@@ -201,7 +199,7 @@ export default function App() {
         {/* Tab View: Terminal */}
         {activeTab === 'terminal' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 items-start">
-            {/* Left 8 Cols: Live Feed Table + Mini Graph */}
+            {/* Left 8 Columns: Live Feed Table + Mini Graph */}
             <div className="lg:col-span-8 flex flex-col gap-4">
               <div className="h-[360px] w-full">
                 <LiveFeedTable
@@ -219,10 +217,19 @@ export default function App() {
               <div className="liquid-glass px-4 py-2.5 rounded-2xl border border-white/5 flex items-center justify-between text-[10px] font-mono text-white/40">
                 <div className="flex items-center gap-2">
                   <TerminalIcon size={12} className="text-cyber-cyan" />
-                  <span>TARGET_PROBE: <strong className="text-white/80">{selectedAddress ? `${selectedAddress.slice(0, 10)}...${selectedAddress.slice(-8)}` : "Awaiting selection"}</strong></span>
+                  <span>
+                    TARGET_PROBE:{" "}
+                    <strong className="text-white/80">
+                      {selectedAddress
+                        ? `${selectedAddress.slice(0, 10)}...${selectedAddress.slice(-8)}`
+                        : "Awaiting selection"}
+                    </strong>
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="hidden sm:inline">CHAIN_SYNC: <strong className="text-emerald-400">100% OK</strong></span>
+                  <span className="hidden sm:inline">
+                    CHAIN_SYNC: <strong className="text-emerald-400">100% OK</strong>
+                  </span>
                   <span className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     RPC_LATENCY: 42ms
@@ -231,7 +238,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right 4 Cols: Threat Sentinel Feed */}
+            {/* Right 4 Columns: Threat Sentinel Feed */}
             <div className="lg:col-span-4 h-[500px] lg:h-[742px] lg:sticky lg:top-28">
               <AlertCards
                 alerts={alerts}
@@ -241,14 +248,14 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab View: Trace / Investigation Fullscreen Graph */}
-        {(activeTab === 'trace' || activeTab === 'investigation') && (
+        {/* Tab View: Investigation / Fullscreen Money Flow Canvas */}
+        {activeTab === 'investigation' && (
           <div className="w-full h-[650px] lg:h-[780px]">
             <MoneyFlowCanvas selectedAddress={selectedAddress || transactions[0]?.from || null} />
           </div>
         )}
 
-        {/* Tab View: Node Architecture */}
+        {/* Tab View: Node Telemetry & Architecture */}
         {activeTab === 'node' && (
           <div className="liquid-glass p-6 lg:p-8 rounded-3xl border border-white/5 space-y-6">
             <div className="flex items-center justify-between border-b border-white/5 pb-4">
@@ -273,9 +280,9 @@ export default function App() {
                 <span className="text-[10px] text-white/30">Outlier threshold: 5.0% Contamination</span>
               </div>
               <div className="p-4 bg-black/40 rounded-xl border border-white/5 space-y-1">
-                <span className="text-white/40 block text-[10px] uppercase tracking-wider">Reasoning Core</span>
-                <span className="text-cyber-rose font-bold text-sm block">Forensic Dossier Synth</span>
-                <span className="text-[10px] text-white/30">Zero-latency heuristic evaluator</span>
+                <span className="text-white/40 block text-[10px] uppercase tracking-wider">Storage Engine</span>
+                <span className="text-cyber-rose font-bold text-sm block">Neon PostgreSQL (pg8000)</span>
+                <span className="text-[10px] text-white/30">Auto-persisting live transactions</span>
               </div>
             </div>
           </div>
@@ -288,6 +295,9 @@ export default function App() {
 
       {/* Forensic Report Modal */}
       <ForensicModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
+
+      {/* Neon Database Explorer Modal */}
+      <DatabaseModal isOpen={isDbModalOpen} onClose={() => setIsDbModalOpen(false)} />
     </div>
   );
 }
