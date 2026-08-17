@@ -26,13 +26,14 @@ import {
   Copy,
   Check,
   ShieldAlert,
-  ArrowUpRight,
   Wallet,
   Coins,
   Building2,
   Lock,
-  Layers,
   Sparkles,
+  Network,
+  Orbit,
+  Move,
 } from "lucide-react";
 
 interface Props {
@@ -50,7 +51,7 @@ interface FlowNodeData {
   onSelect?: (address: string) => void;
 }
 
-/* ─── Custom Flow Node Component with Handles & Aesthetic Badges ─── */
+/* ─── Custom Flow Node Component with Wide Aesthetics & Free Draggability ─── */
 function CustomFlowNode({ data }: NodeProps<Node<FlowNodeData>>) {
   const [copied, setCopied] = useState(false);
 
@@ -69,12 +70,11 @@ function CustomFlowNode({ data }: NodeProps<Node<FlowNodeData>>) {
     }
   };
 
-  // Color schemes & icons based on category
   const config = useMemo(() => {
     switch (data.category) {
       case "target":
         return {
-          border: "border-cyan-400/80 ring-2 ring-cyan-400/40 shadow-[0_0_30px_rgba(0,210,255,0.4)]",
+          border: "border-cyan-400/90 ring-2 ring-cyan-400/30 shadow-[0_0_35px_rgba(0,210,255,0.35)]",
           bg: "bg-gradient-to-br from-[#1b253b] via-[#15192c] to-[#121424]",
           badgeBg: "bg-cyan-500/20 text-cyan-300 border-cyan-400/40",
           icon: <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />,
@@ -136,26 +136,26 @@ function CustomFlowNode({ data }: NodeProps<Node<FlowNodeData>>) {
   return (
     <div
       onClick={handleClick}
-      className={`group relative rounded-2xl border p-3.5 min-w-[210px] max-w-[250px] cursor-pointer transition-all duration-300 hover:scale-105 select-none ${config.bg} ${config.border}`}
+      className={`group relative rounded-2xl border p-3.5 w-[230px] cursor-grab active:cursor-grabbing transition-all duration-200 select-none ${config.bg} ${config.border}`}
     >
       {/* React Flow Top Handle */}
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-3 !h-3 !bg-cyan-400 !border-2 !border-[#131424] !-top-1.5 transition-transform group-hover:scale-125"
+        className="!w-3.5 !h-3.5 !bg-cyan-400 !border-2 !border-[#131424] !-top-2 transition-transform group-hover:scale-125"
       />
 
       {/* Header: Icon & Category Tag */}
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-1.5 mb-2">
+        <div className="flex items-center gap-1.5 min-w-0">
           {config.icon}
-          <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${config.badgeBg}`}>
+          <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border truncate ${config.badgeBg}`}>
             {config.tag}
           </span>
         </div>
         {data.riskScore > 0 && (
           <span
-            className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
+            className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded shrink-0 ${
               data.riskScore >= 70
                 ? "bg-rose-500/30 text-rose-300 border border-rose-500/50 animate-pulse"
                 : data.riskScore >= 40
@@ -163,7 +163,7 @@ function CustomFlowNode({ data }: NodeProps<Node<FlowNodeData>>) {
                 : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
             }`}
           >
-            {data.riskScore}% RISK
+            {data.riskScore}%
           </span>
         )}
       </div>
@@ -182,8 +182,8 @@ function CustomFlowNode({ data }: NodeProps<Node<FlowNodeData>>) {
         </span>
         <button
           onClick={handleCopy}
-          className="p-1 rounded-md hover:bg-white/10 text-white/40 hover:text-white transition-colors"
-          title="Copy full address"
+          className="p-1 rounded-md hover:bg-white/10 text-white/40 hover:text-white transition-colors cursor-pointer"
+          title="Copy address"
         >
           {copied ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
         </button>
@@ -201,7 +201,7 @@ function CustomFlowNode({ data }: NodeProps<Node<FlowNodeData>>) {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-3 !h-3 !bg-cyan-400 !border-2 !border-[#131424] !-bottom-1.5 transition-transform group-hover:scale-125"
+        className="!w-3.5 !h-3.5 !bg-cyan-400 !border-2 !border-[#131424] !-bottom-2 transition-transform group-hover:scale-125"
       />
     </div>
   );
@@ -211,11 +211,10 @@ const nodeTypes = {
   flowNode: CustomFlowNode,
 };
 
-/* ─── Deterministic Fallback Topology Generator ─── */
-function generateFallbackGraph(targetAddr: string): { nodes: Node[]; edges: Edge[] } {
+/* ─── Spacious Tree Layout Generator ─── */
+function generateSpaciousTreeTopology(targetAddr: string): { nodes: Node[]; edges: Edge[] } {
   const targetLower = targetAddr.toLowerCase();
   
-  // Seed calculation for deterministic layout
   let seed = 0;
   for (let i = 0; i < targetLower.length; i++) {
     seed = (seed * 31 + targetLower.charCodeAt(i)) & 0xffffffff;
@@ -241,18 +240,18 @@ function generateFallbackGraph(targetAddr: string): { nodes: Node[]; edges: Edge
     { label: "Kraken Settlement", category: "cex" as const, risk: 20 },
   ];
 
-  const numHops1 = 3;
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  // Root Target Node
-  const rootX = 400;
+  // Root Target Node at Center Top
+  const rootX = 580;
   const rootY = 40;
 
   nodes.push({
     id: targetLower,
     type: "flowNode",
     position: { x: rootX, y: rootY },
+    draggable: true,
     data: {
       label: `Target Probe (${targetLower.slice(0, 6)}...${targetLower.slice(-4)})`,
       address: targetLower,
@@ -262,9 +261,11 @@ function generateFallbackGraph(targetAddr: string): { nodes: Node[]; edges: Edge
     },
   });
 
-  // Level 1 Nodes
-  const hop1Spacing = 280;
+  // Level 1: 3 Spacious Branches
+  const numHops1 = 3;
+  const hop1Spacing = 440; // Wide horizontal gap between Level 1 nodes
   const startHop1X = rootX - ((numHops1 - 1) * hop1Spacing) / 2;
+  const hop1Y = 270; // 230px vertical gap
 
   for (let i = 0; i < numHops1; i++) {
     const protoIndex = Math.floor(pseudoRand(i + 1) * branchProtocols.length) % branchProtocols.length;
@@ -274,14 +275,13 @@ function generateFallbackGraph(targetAddr: string): { nodes: Node[]; edges: Edge
     ).join("")}`;
 
     const hop1X = startHop1X + i * hop1Spacing;
-    const hop1Y = 220;
-
     const eth1 = (pseudoRand(i + 20) * 45 + 2).toFixed(2);
 
     nodes.push({
       id: hop1Addr,
       type: "flowNode",
       position: { x: hop1X, y: hop1Y },
+      draggable: true,
       data: {
         label: proto.label,
         address: hop1Addr,
@@ -307,8 +307,11 @@ function generateFallbackGraph(targetAddr: string): { nodes: Node[]; edges: Edge
       labelBgStyle: { fill: "#131424", fillOpacity: 0.95, stroke, strokeWidth: 1, rx: 6, ry: 6 },
     });
 
-    // Level 2 Sub-nodes (1-2 per hop 1)
-    const numSub = Math.floor(pseudoRand(i + 40) * 2) + 1;
+    // Level 2: 2 Sub-nodes per hop 1, spaced generously underneath
+    const numSub = 2;
+    const subGap = 210; // Clearance between sibling sub-nodes
+    const hop2Y = 530; // 260px vertical clearance from hop1
+
     for (let j = 0; j < numSub; j++) {
       const subIndex = Math.floor(pseudoRand(j + i * 5 + 50) * subNodesPool.length) % subNodesPool.length;
       const sub = subNodesPool[subIndex];
@@ -316,16 +319,15 @@ function generateFallbackGraph(targetAddr: string): { nodes: Node[]; edges: Edge
         Math.floor(pseudoRand(k + j * 7 + i * 13) * 16).toString(16)
       ).join("")}`;
 
-      const subOffset = (j - (numSub - 1) / 2) * 140;
+      const subOffset = (j === 0 ? -subGap / 2 : subGap / 2);
       const hop2X = hop1X + subOffset;
-      const hop2Y = 400;
-
       const eth2 = (parseFloat(eth1) * (pseudoRand(j + 70) * 0.5 + 0.3)).toFixed(2);
 
       nodes.push({
         id: hop2Addr,
         type: "flowNode",
         position: { x: hop2X, y: hop2Y },
+        draggable: true,
         data: {
           label: sub.label,
           address: hop2Addr,
@@ -355,12 +357,61 @@ function generateFallbackGraph(targetAddr: string): { nodes: Node[]; edges: Edge
   return { nodes, edges };
 }
 
+/* ─── Radial Orbit Layout Generator ─── */
+function applyRadialOrbitLayout(nodes: Node[]): Node[] {
+  const targetNode = nodes.find((n) => (n.data as any)?.isTarget) || nodes[0];
+  if (!targetNode) return nodes;
+
+  const centerX = 650;
+  const centerY = 400;
+
+  const otherNodes = nodes.filter((n) => n.id !== targetNode.id);
+  const hop1Nodes = otherNodes.slice(0, 3);
+  const hop2Nodes = otherNodes.slice(3);
+
+  const radius1 = 280;
+  const radius2 = 480;
+
+  return nodes.map((node) => {
+    if (node.id === targetNode.id) {
+      return { ...node, position: { x: centerX, y: centerY } };
+    }
+
+    const hop1Index = hop1Nodes.findIndex((n) => n.id === node.id);
+    if (hop1Index !== -1) {
+      const angle = (hop1Index * (2 * Math.PI)) / hop1Nodes.length - Math.PI / 2;
+      return {
+        ...node,
+        position: {
+          x: Math.round(centerX + radius1 * Math.cos(angle)),
+          y: Math.round(centerY + radius1 * Math.sin(angle)),
+        },
+      };
+    }
+
+    const hop2Index = hop2Nodes.findIndex((n) => n.id === node.id);
+    if (hop2Index !== -1) {
+      const angle = (hop2Index * (2 * Math.PI)) / (hop2Nodes.length || 1) - Math.PI / 2 + 0.3;
+      return {
+        ...node,
+        position: {
+          x: Math.round(centerX + radius2 * Math.cos(angle)),
+          y: Math.round(centerY + radius2 * Math.sin(angle)),
+        },
+      };
+    }
+
+    return node;
+  });
+}
+
 /* ─── Inner Canvas Component ─── */
 function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [loading, setLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<"tree" | "orbit">("tree");
   const [activeTarget, setActiveTarget] = useState<string>(
     selectedAddress || "0xeb9863e28d0fc0702a5197e66674f86ee2c35b5e"
   );
@@ -377,7 +428,7 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
   );
 
   const fetchGraph = useCallback(
-    (targetAddr: string) => {
+    (targetAddr: string, mode: "tree" | "orbit" = layoutMode) => {
       setLoading(true);
       const cleanAddr = targetAddr.toLowerCase();
 
@@ -388,7 +439,6 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
         })
         .then((data) => {
           if (data && Array.isArray(data.nodes) && data.nodes.length > 0) {
-            // Transform backend nodes to custom flowNode type with handles & styles
             const transformedNodes: Node[] = data.nodes.map((n: any, idx: number) => {
               const isTarget = n.id.toLowerCase() === cleanAddr;
               const label = n.data?.label || n.label || `${n.id.slice(0, 6)}...${n.id.slice(-4)}`;
@@ -414,15 +464,15 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
                 risk = 5;
               }
 
-              // Compute clean tree position if not provided
+              // Spacious grid layout calculation for backend data
               let pos = n.position;
               if (!pos || (pos.x === 0 && pos.y === 0)) {
                 if (isTarget) {
-                  pos = { x: 400, y: 40 };
+                  pos = { x: 580, y: 40 };
                 } else {
-                  const col = idx % 4;
-                  const row = Math.floor(idx / 4) + 1;
-                  pos = { x: 150 + col * 240, y: 40 + row * 180 };
+                  const col = idx % 3;
+                  const row = Math.floor(idx / 3) + 1;
+                  pos = { x: 140 + col * 440, y: 40 + row * 250 };
                 }
               }
 
@@ -430,6 +480,7 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
                 id: n.id,
                 type: "flowNode",
                 position: pos,
+                draggable: true,
                 data: {
                   label,
                   address: n.id,
@@ -460,56 +511,64 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
               };
             });
 
-            setNodes(transformedNodes);
+            const finalNodes = mode === "orbit" ? applyRadialOrbitLayout(transformedNodes) : transformedNodes;
+            setNodes(finalNodes);
             setEdges(transformedEdges);
           } else {
-            // Fallback generation for resilient instant preview
-            const fallback = generateFallbackGraph(cleanAddr);
+            const fallback = generateSpaciousTreeTopology(cleanAddr);
             const wrappedNodes = fallback.nodes.map((n) => ({
               ...n,
-              data: {
-                ...n.data,
-                onSelect: handleNodeSelect,
-              },
+              data: { ...n.data, onSelect: handleNodeSelect },
             }));
-            setNodes(wrappedNodes);
+            const finalNodes = mode === "orbit" ? applyRadialOrbitLayout(wrappedNodes) : wrappedNodes;
+            setNodes(finalNodes);
             setEdges(fallback.edges);
           }
         })
-        .catch((err) => {
-          console.warn("Backend graph fetch fallback activated:", err);
-          const fallback = generateFallbackGraph(cleanAddr);
+        .catch(() => {
+          const fallback = generateSpaciousTreeTopology(cleanAddr);
           const wrappedNodes = fallback.nodes.map((n) => ({
             ...n,
-            data: {
-              ...n.data,
-              onSelect: handleNodeSelect,
-            },
+            data: { ...n.data, onSelect: handleNodeSelect },
           }));
-          setNodes(wrappedNodes);
+          const finalNodes = mode === "orbit" ? applyRadialOrbitLayout(wrappedNodes) : wrappedNodes;
+          setNodes(finalNodes);
           setEdges(fallback.edges);
         })
         .finally(() => {
           setLoading(false);
           setTimeout(() => {
-            fitView({ padding: 0.25, duration: 500 });
+            fitView({ padding: 0.35, duration: 600 });
           }, 120);
         });
     },
-    [fitView, handleNodeSelect, setNodes, setEdges]
+    [fitView, handleNodeSelect, layoutMode, setNodes, setEdges]
   );
 
   useEffect(() => {
     if (selectedAddress) {
       setActiveTarget(selectedAddress);
-      fetchGraph(selectedAddress);
+      fetchGraph(selectedAddress, layoutMode);
     } else {
-      fetchGraph(activeTarget);
+      fetchGraph(activeTarget, layoutMode);
     }
-  }, [selectedAddress, fetchGraph]);
+  }, [selectedAddress, fetchGraph, layoutMode]);
+
+  const handleToggleLayout = () => {
+    const nextMode = layoutMode === "tree" ? "orbit" : "tree";
+    setLayoutMode(nextMode);
+    if (nextMode === "orbit") {
+      setNodes((prev) => applyRadialOrbitLayout(prev));
+    } else {
+      fetchGraph(activeTarget, "tree");
+    }
+    setTimeout(() => {
+      fitView({ padding: 0.35, duration: 600 });
+    }, 150);
+  };
 
   const handleResetView = useCallback(() => {
-    fitView({ padding: 0.25, duration: 400 });
+    fitView({ padding: 0.35, duration: 500 });
   }, [fitView]);
 
   return (
@@ -528,15 +587,16 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-white block">
               Money Flow <span className="text-cyan-300">Topology</span>
             </span>
-            <span className="text-[10px] text-white/40 font-mono">
-              Click any node to re-center & trace connected hops
+            <span className="text-[10px] text-white/40 font-mono flex items-center gap-1.5">
+              <Move size={10} className="text-cyan-400/80" />
+              Freely drag any node • Click to re-center
             </span>
           </div>
         </div>
 
         {/* Center Target badge */}
         {activeTarget && (
-          <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
+          <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
             <span className="text-[10px] text-white/40 uppercase">Target Probe:</span>
             <strong className="text-white font-bold">{activeTarget}</strong>
           </div>
@@ -544,10 +604,20 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
 
         {/* Interactive Controls */}
         <div className="flex items-center gap-2">
+          {/* Layout Mode Toggle Button */}
           <button
-            onClick={() => fetchGraph(activeTarget)}
+            onClick={handleToggleLayout}
+            className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer"
+            title="Toggle between Tree Flow & Radial Orbit layout"
+          >
+            {layoutMode === "tree" ? <Orbit size={13} /> : <Network size={13} />}
+            <span>{layoutMode === "tree" ? "Radial Orbit" : "Tree Flow"}</span>
+          </button>
+
+          <button
+            onClick={() => fetchGraph(activeTarget, layoutMode)}
             className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-all cursor-pointer"
-            title="Refresh Graph"
+            title="Re-Align & Refresh Layout"
           >
             <RefreshCw size={14} className={loading ? "animate-spin text-cyan-400" : ""} />
           </button>
@@ -583,7 +653,7 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
       </div>
 
       {/* Interactive Flow Canvas */}
-      <div className="flex-1 w-full h-full relative bg-[#131424] min-h-[480px]">
+      <div className="flex-1 w-full h-full relative bg-[#131424] min-h-[520px]">
         {/* Soft Violet/Cyan ambient orbs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="ambient-orb ambient-orb-violet w-[500px] h-[500px] top-1/4 left-1/4 opacity-25" />
@@ -613,13 +683,13 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
           elementsSelectable={true}
           panOnDrag={true}
           zoomOnScroll={true}
-          minZoom={0.2}
-          maxZoom={1.8}
-          defaultViewport={{ x: 0, y: 0, zoom: 0.85 }}
+          minZoom={0.15}
+          maxZoom={2}
+          defaultViewport={{ x: 0, y: 0, zoom: 0.75 }}
           fitView
-          fitViewOptions={{ padding: 0.25 }}
+          fitViewOptions={{ padding: 0.35 }}
         >
-          <Background color="rgba(155, 81, 224, 0.2)" gap={28} size={1.5} />
+          <Background color="rgba(155, 81, 224, 0.2)" gap={32} size={1.5} />
           <Controls className="!bg-[#1b1c33]/90 !border !border-white/10 !rounded-2xl !overflow-hidden !shadow-2xl [&>button]:!bg-[#1b1c33] [&>button]:!border-b [&>button]:!border-white/10 [&>button]:!fill-cyan-300 [&>button:hover]:!bg-cyan-500/20" />
         </ReactFlow>
 
