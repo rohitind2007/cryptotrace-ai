@@ -12,6 +12,7 @@ import MoneyFlowCanvas from "./components/MoneyFlowCanvas";
 import ForensicModal from "./components/ForensicModal";
 import DatabaseModal from "./components/DatabaseModal";
 import RiskMatrixModal from "./components/RiskMatrixModal";
+import MobileOrientationModal from "./components/MobileOrientationModal";
 import { TransactionPayload } from "./types";
 import {
   Terminal as TerminalIcon,
@@ -392,6 +393,9 @@ export default function App() {
 
       {/* Neon Database Modal */}
       <DatabaseModal isOpen={isDbModalOpen} onClose={() => setIsDbModalOpen(false)} />
+
+      {/* Mobile Portrait Orientation Suggestion Modal */}
+      <MobileOrientationModal />
     </div>
   );
 }
