@@ -1,45 +1,89 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
   <defs>
-    <!-- Background Gradient -->
-    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#0e1726" />
-      <stop offset="100%" stop-color="#020617" />
+    <!-- RecehTok Dark Background Gradient -->
+    <radialGradient id="recehBg" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#1e1f38" />
+      <stop offset="60%" stop-color="#131424" />
+      <stop offset="100%" stop-color="#0d0e1a" />
     </radialGradient>
 
-    <!-- Cyan Neon Gradient -->
-    <linearGradient id="cyberNeon" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38bdf8" />
-      <stop offset="50%" stop-color="#22d3ee" />
-      <stop offset="100%" stop-color="#06b6d4" />
+    <!-- Cyan to Magenta Signature Gradient -->
+    <linearGradient id="traceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d2ff" />
+      <stop offset="50%" stop-color="#7928ca" />
+      <stop offset="100%" stop-color="#ff2d87" />
     </linearGradient>
 
-    <!-- Inner Core Glow Filter -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    <!-- Cyan Neon Glow -->
+    <linearGradient id="cyanNeon" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="100%" stop-color="#4facfe" />
+    </linearGradient>
+
+    <!-- Pink Accent Gradient -->
+    <linearGradient id="pinkNeon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff007a" />
+      <stop offset="100%" stop-color="#7928ca" />
+    </linearGradient>
+
+    <!-- Glow Filter for Sharp High-DPI Tabs -->
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
 
-  <!-- Dark Shield Base Container -->
-  <rect width="128" height="128" rx="32" fill="url(#bgGlow)" stroke="rgba(34, 211, 238, 0.2)" stroke-width="2"/>
+  <!-- Deep Purple-Navy Rounded Base Container -->
+  <rect width="128" height="128" rx="34" fill="url(#recehBg)" stroke="url(#traceGrad)" stroke-width="3"/>
 
-  <!-- Outer Security Shield Contour -->
-  <path d="M64 20 L96 32 C96 64 80 88 64 104 C48 88 32 64 32 32 Z" 
-        fill="none" 
-        stroke="url(#cyberNeon)" 
-        stroke-width="4" 
-        stroke-linejoin="round"
-        filter="url(#glow)"/>
+  <!-- Subtle Internal Grid Matrix Points -->
+  <circle cx="36" cy="36" r="1.5" fill="#ffffff" opacity="0.12"/>
+  <circle cx="92" cy="36" r="1.5" fill="#ffffff" opacity="0.12"/>
+  <circle cx="36" cy="92" r="1.5" fill="#ffffff" opacity="0.12"/>
+  <circle cx="92" cy="92" r="1.5" fill="#ffffff" opacity="0.12"/>
 
-  <!-- Blockchain Multi-Hop Graph Lines -->
-  <line x1="64" y1="44" x2="48" y2="60" stroke="#38bdf8" stroke-width="2" stroke-dasharray="2 2" opacity="0.8"/>
-  <line x1="64" y1="44" x2="80" y2="60" stroke="#38bdf8" stroke-width="2" stroke-dasharray="2 2" opacity="0.8"/>
-  <line x1="48" y1="60" x2="64" y2="78" stroke="#38bdf8" stroke-width="2" opacity="0.8"/>
-  <line x1="80" y1="60" x2="64" y2="78" stroke="#38bdf8" stroke-width="2" opacity="0.8"/>
+  <!-- Multi-Hop Forensic Graph Connection Beams -->
+  <line x1="64" y1="26" x2="38" y2="60" stroke="#00d2ff" stroke-width="2.5" stroke-dasharray="3 3" opacity="0.75"/>
+  <line x1="64" y1="26" x2="90" y2="60" stroke="#ff2d87" stroke-width="2.5" stroke-dasharray="3 3" opacity="0.75"/>
+  <line x1="38" y1="60" x2="64" y2="88" stroke="#00d2ff" stroke-width="3" opacity="0.9"/>
+  <line x1="90" y1="60" x2="64" y2="88" stroke="#ff2d87" stroke-width="3" opacity="0.9"/>
+  <line x1="64" y1="88" x2="64" y2="104" stroke="url(#traceGrad)" stroke-width="3.5"/>
 
-  <!-- Forensic Graph Vertices / Nodes -->
-  <circle cx="64" cy="44" r="5" fill="#f43f5e" filter="url(#glow)"/>  <!-- Flagged Origin Point -->
-  <circle cx="48" cy="60" r="4" fill="#22d3ee"/>
-  <circle cx="80" cy="60" r="4" fill="#22d3ee"/>
-  <circle cx="64" cy="78" r="5" fill="#38bdf8" filter="url(#glow)"/>  <!-- Destination Core -->
+  <!-- Ethereum Crystal / AI Diamond Outer Facets -->
+  <!-- Top Left Facet -->
+  <polygon points="64,26 38,60 64,52" fill="url(#cyanNeon)" opacity="0.9" />
+  <!-- Top Right Facet -->
+  <polygon points="64,26 90,60 64,52" fill="url(#pinkNeon)" opacity="0.9" />
+  <!-- Bottom Left Facet -->
+  <polygon points="64,52 38,60 64,88" fill="#00d2ff" opacity="0.8" />
+  <!-- Bottom Right Facet -->
+  <polygon points="64,52 90,60 64,88" fill="#ff2d87" opacity="0.8" />
+
+  <!-- Lower Diamond Shards -->
+  <polygon points="64,88 38,60 64,104" fill="url(#cyanNeon)" opacity="0.5" />
+  <polygon points="64,88 90,60 64,104" fill="url(#pinkNeon)" opacity="0.6" />
+
+  <!-- Forensic AI Nodes with Neon Pulses -->
+  <!-- Top Origin Node (Cyan Beacon) -->
+  <circle cx="64" cy="26" r="6" fill="#00f2fe" filter="url(#neonGlow)"/>
+  <circle cx="64" cy="26" r="2.5" fill="#ffffff"/>
+
+  <!-- Left Hop Node (Cyan DEX/Liquidity) -->
+  <circle cx="38" cy="60" r="5" fill="#00d2ff" filter="url(#neonGlow)"/>
+  <circle cx="38" cy="60" r="2" fill="#ffffff"/>
+
+  <!-- Right Hop Node (Threat Flag / Anomaly Pink) -->
+  <circle cx="90" cy="60" r="5.5" fill="#ff2d87" filter="url(#neonGlow)"/>
+  <circle cx="90" cy="60" r="2" fill="#ffffff"/>
+
+  <!-- Core Anomaly Detection Apex (Glowing Purple/White) -->
+  <circle cx="64" cy="52" r="3.5" fill="#ffffff" filter="url(#neonGlow)"/>
+
+  <!-- Bottom Settlement / Ledger Node -->
+  <circle cx="64" cy="104" r="5" fill="#a855f7" filter="url(#neonGlow)"/>
+  <circle cx="64" cy="104" r="2" fill="#ffffff"/>
 </svg>

@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { ShieldAlert, Fingerprint } from "lucide-react";
+import { ShieldAlert, Fingerprint, ArrowRight } from "lucide-react";
 import { TransactionPayload } from "../types";
 
 interface AlertCardsProps {
@@ -10,71 +10,71 @@ interface AlertCardsProps {
 
 export default function AlertCards({ alerts, onSelectAlert }: AlertCardsProps) {
   return (
-    <div className="space-y-3 overflow-y-auto max-h-[750px] pr-1">
+    <div className="space-y-3 overflow-y-auto max-h-[750px] pr-1 custom-scrollbar">
       {alerts.length === 0 ? (
-        <div className="p-8 text-center text-xs font-mono text-white/30 liquid-glass rounded-2xl">
-          <div className="shimmer-bg inline-block px-6 py-2 rounded-lg mb-2">
+        <div className="p-8 text-center text-xs font-mono text-white/30 bg-[#1b1c33] rounded-[2rem] border border-white/5">
+          <div className="inline-block px-6 py-2 rounded-lg mb-2 bg-white/5">
             Scanning live blocks for suspicious behavior...
           </div>
           <div className="text-[10px] text-white/20 mt-2">Threat sentinel monitoring active</div>
         </div>
       ) : (
         alerts.map((alert, idx) => {
-          const isCritical = alert.severity === "CRITICAL";
-          const isHigh = alert.severity === "HIGH";
+          const isCritical = alert.severity === "CRITICAL" || (alert.risk_score || 0) >= 80;
 
           return (
             <motion.div
-              key={alert.tx_hash}
+              key={alert.tx_hash || idx}
               initial={{ opacity: 0, x: -24, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{
-                delay: idx * 0.06,
+                delay: idx * 0.05,
                 type: "spring",
                 stiffness: 260,
                 damping: 20,
               }}
               onClick={() => onSelectAlert(alert)}
-              className={`liquid-glass p-4 rounded-[1.25rem] border-l-2 relative group cursor-pointer transition-all duration-300 gradient-border-sweep
-                ${isCritical
-                  ? "border-l-cyber-rose glow-border-rose"
-                  : isHigh
-                  ? "border-l-orange-500 glow-border-amber"
-                  : "border-l-cyber-cyan hover:glow-border-cyan"
-                }`}
+              className={`p-4 rounded-[1.5rem] bg-[#1b1c33] border relative group cursor-pointer transition-all duration-300 shadow-xl hover:scale-[1.01] ${
+                isCritical
+                  ? "border-[#ff2d87]/40 hover:border-[#ff2d87] shadow-[0_0_15px_rgba(255,45,135,0.2)]"
+                  : "border-white/5 hover:border-cyan-500/40"
+              }`}
             >
               <div className="flex justify-between items-start mb-2">
                 <span
-                  className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide
-                  ${isCritical
-                    ? "bg-cyber-rose/20 text-cyber-rose border border-cyber-rose/20"
-                    : isHigh
-                    ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
-                    : "bg-white/5 text-white/60 border border-white/5"
+                  className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide font-mono ${
+                    isCritical
+                      ? "bg-[#ff2d87]/20 text-[#ff2d87] border border-[#ff2d87]/40"
+                      : "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"
                   }`}
                 >
-                  {alert.severity}
+                  {alert.severity || "FLAGGED"} ({alert.risk_score}%)
                 </span>
-                <span className="text-[9px] font-mono text-white/30">
-                  {alert.value_eth.toFixed(3)} ETH
+                <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                  {Number(alert.value_eth || 0).toFixed(3)} ETH
                 </span>
               </div>
-              <h4 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-                {isCritical ? (
-                  <ShieldAlert size={14} className="text-cyber-rose animate-breathe" />
-                ) : (
-                  <Fingerprint size={14} className="text-white/40 group-hover:text-cyber-cyan transition-colors" />
-                )}
-                {alert.ai_forensic_dossier?.threat_category || "Anomaly Detected"}
-              </h4>
-              <p className="text-xs text-white/50 font-light leading-snug line-clamp-2">
+
+              <div className="flex items-center gap-2 mb-1.5">
+                <ShieldAlert size={14} className={isCritical ? "text-[#ff2d87]" : "text-cyan-400"} />
+                <span className="font-heading font-bold text-xs text-white group-hover:text-cyber-cyan transition-colors">
+                  {alert.ai_forensic_dossier?.threat_category || "Outlier Anomaly"}
+                </span>
+              </div>
+
+              <p className="text-[11px] text-white/50 font-mono line-clamp-2 leading-relaxed">
                 {alert.ai_forensic_dossier?.investigator_summary ||
-                  alert.rules_triggered.join(", ")}
+                  `Detected anomalous transfer on Block #${alert.block_number}.`}
               </p>
 
-              {/* Hover reveal action hint */}
-              <div className="absolute bottom-2 right-3 text-[9px] font-mono text-white/0 group-hover:text-white/30 transition-all duration-300">
-                Click to investigate →
+              <div className="mt-3 pt-2.5 border-t border-white/5 flex justify-between items-center text-[10px] font-mono">
+                <span className="text-white/30 truncate max-w-[160px]">
+                  {alert.from.slice(0, 8)}...{alert.from.slice(-6)}
+                </span>
+                <span className="text-cyber-cyan group-hover:underline flex items-center gap-1 font-bold">
+                  <span>Open Dossier</span>
+                  <ArrowRight size={10} />
+                </span>
               </div>
             </motion.div>
           );

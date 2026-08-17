@@ -19,37 +19,36 @@
    * PERF: Reduced backdrop-blur from 16px → 8px.
    * backdrop-filter is the #1 FPS killer when stacked on many elements.
    */
+  /*
+   * Sleek Minimalist Dark Glass
+   */
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%), rgba(6, 9, 20, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     contain: layout style;
   }
 
   /* Gradient Text — Cyan → Violet */
   .gradient-text {
-    background: linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #a78bfa 100%);
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 60%, #a78bfa 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Gradient Text — Rose variant */
+  /* Gradient Text — Rose / Sunset variant */
   .gradient-text-rose {
-    background: linear-gradient(135deg, #fbbf24 0%, #f43f5e 50%, #e11d48 100%);
+    background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /*
-   * PERF: Static glow borders (no animation). Animate via opacity on the
-   * element itself if needed — never animate box-shadow directly.
-   */
   .glow-border-cyan {
-    box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
   }
 
   .glow-border-rose {
@@ -62,16 +61,20 @@
 }
 
 /*
- * ─── Ambient Gradient Orbs ───
- * PERF: Reduced blur from 100px → 60px. Using solid color with opacity
- * instead of radial-gradient to reduce paint cost. GPU-promoted with
- * will-change and translate3d.
+ * ─── Minimalist Deep Dark Ambient ───
  */
+.vibrant-aurora-bg {
+  background: 
+    radial-gradient(circle at 18% 15%, rgba(14, 165, 233, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 82% 25%, rgba(139, 92, 246, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 50% 95%, rgba(244, 63, 94, 0.06) 0%, transparent 45%),
+    linear-gradient(180deg, #03050d 0%, #050814 50%, #02040a 100%);
+}
+
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.08;
+  filter: blur(110px);
   pointer-events: none;
   will-change: transform;
   transform: translate3d(0, 0, 0);
@@ -79,20 +82,28 @@
 }
 
 .ambient-orb-cyan {
-  background: #22d3ee;
-}
-
-.ambient-orb-rose {
-  background: #f43f5e;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.2) 0%, transparent 70%);
 }
 
 .ambient-orb-violet {
-  background: #a78bfa;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.18) 0%, transparent 70%);
 }
 
-/* ─── Dot Grid Background ─── */
+.ambient-orb-rose {
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.14) 0%, transparent 70%);
+}
+
+.ambient-orb-emerald {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.14) 0%, transparent 70%);
+}
+
+.ambient-orb-amber {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
+}
+
+/* ─── Cyber Grid Overlay ─── */
 .dot-grid-bg {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
