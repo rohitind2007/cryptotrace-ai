@@ -121,7 +121,7 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Search */}
               <div className="relative flex items-center">
                 <Search size={14} className="absolute left-3 text-white/30" />
@@ -130,9 +130,21 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
                   placeholder="Filter records..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-3 py-1.5 bg-[#131424] border border-white/10 rounded-full text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:border-cyan-400 w-44 sm:w-56"
+                  className="pl-9 pr-3 py-1.5 bg-[#131424] border border-white/10 rounded-full text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:border-cyan-400 w-36 sm:w-52"
                 />
               </div>
+
+              {/* Open in Neon Console */}
+              <a
+                href="https://console.neon.tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 px-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(0,210,255,0.25)]"
+                title="Open Neon Cloud Console in new tab"
+              >
+                <ExternalLink size={14} />
+                <span className="hidden sm:inline font-bold">Neon Console</span>
+              </a>
 
               {/* Export CSV */}
               <button
@@ -224,8 +236,19 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-white/5 bg-[#171829] flex justify-between items-center text-[10px] font-mono text-white/40">
-            <span>DATABASE: NEON CLOUD POSTGRESQL</span>
+          <div className="p-4 border-t border-white/5 bg-[#171829] flex flex-wrap justify-between items-center text-[10px] font-mono text-white/40 gap-2">
+            <div className="flex items-center gap-2">
+              <span>DATABASE: NEON CLOUD POSTGRESQL</span>
+              <span className="text-white/20">•</span>
+              <a
+                href="https://console.neon.tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:underline flex items-center gap-1"
+              >
+                console.neon.tech <ExternalLink size={10} />
+              </a>
+            </div>
             <span>SHOWING {filteredRecords.length} AUDIT LOGS</span>
           </div>
         </motion.div>
