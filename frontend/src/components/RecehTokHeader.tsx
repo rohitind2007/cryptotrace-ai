@@ -49,9 +49,17 @@ export default function RecehTokHeader({
       <div className="flex flex-col">
         <h1 className="text-2xl font-bold text-white tracking-tight font-heading flex items-center gap-2.5">
           <span>{title}</span>
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyber-cyan">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            LIVE MAINNET
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold transition-all ${
+            status
+              ? 'bg-cyan-500/10 border border-cyan-500/30 text-cyber-cyan'
+              : 'bg-rose-500/10 border border-rose-500/30 text-rose-400'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              status
+                ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]'
+                : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'
+            }`} />
+            {status ? 'LIVE MAINNET' : 'OFFLINE'}
           </span>
         </h1>
         <p className="text-xs text-white/40 mt-0.5">
@@ -143,7 +151,9 @@ export default function RecehTokHeader({
               <div className="px-3 py-2 border-b border-white/5 flex flex-col">
                 <span className="text-[10px] text-white/40 uppercase">Signed in as</span>
                 <span className="font-bold text-white text-xs">Admin (Sentinel Lead)</span>
-                <span className="text-[9px] text-emerald-400 mt-0.5">● Node Connected (Mainnet)</span>
+                <span className={`text-[9px] mt-0.5 ${status ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {status ? '● Node Connected (Mainnet)' : '○ Backend Offline (Disconnected)'}
+                </span>
               </div>
 
               {onOpenDatabase && (

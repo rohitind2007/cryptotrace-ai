@@ -255,8 +255,8 @@ export default function RecehTokSidebar({
           <div className="flex items-center gap-2 min-w-0">
             <div className={`w-2 h-2 rounded-full shrink-0 ${status ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} />
             {!isCollapsed && (
-              <span className="text-[10px] font-mono text-white/70 truncate">
-                Ethereum Mainnet
+              <span className={`text-[10px] font-mono truncate ${status ? 'text-white/70' : 'text-rose-400/80 font-bold'}`}>
+                {status ? 'Ethereum Mainnet' : 'Mainnet (Offline)'}
               </span>
             )}
           </div>
