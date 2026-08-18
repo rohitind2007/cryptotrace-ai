@@ -8,7 +8,7 @@ import RecehTokNotificationPanel from "./components/RecehTokNotificationPanel";
 import RecehTokHistoryRow from "./components/RecehTokHistoryRow";
 import LiveFeedTable from "./components/LiveFeedTable";
 import AlertCards from "./components/AlertCards";
-import MoneyFlowCanvas from "./components/MoneyFlowCanvas";
+import MoneyFlowCanvas, { getKnownEntityLabel } from "./components/MoneyFlowCanvas";
 import ForensicModal from "./components/ForensicModal";
 import DatabaseModal from "./components/DatabaseModal";
 import RiskMatrixModal from "./components/RiskMatrixModal";
@@ -285,7 +285,7 @@ export default function App() {
                     Money Flow <span className="gradient-text">Investigation Canvas</span>
                   </h2>
                   <p className="text-[11px] text-white/40 font-mono">
-                    Deep multi-hop fund flow analysis for target: <strong className="text-cyber-cyan">{selectedAddress || 'None selected'}</strong>
+                    Deep multi-hop fund flow analysis for target: <strong className="text-cyber-cyan">{getKnownEntityLabel(selectedAddress)}</strong>
                   </p>
                 </div>
                 <div className="flex items-center gap-3">

@@ -41,7 +41,7 @@ interface Props {
   onSelectAddress?: (address: string) => void;
 }
 
-interface FlowNodeData {
+export interface FlowNodeData {
   label: string;
   address: string;
   category: "target" | "mixer" | "dex" | "cex" | "storage" | "lending" | "wallet";
@@ -49,6 +49,199 @@ interface FlowNodeData {
   ethAmount?: string;
   isTarget?: boolean;
   onSelect?: (address: string) => void;
+}
+
+/* ─── Known Ethereum Entities & ENS Registry ─── */
+export const KNOWN_ENTITIES: Record<string, {
+  label: string;
+  category: FlowNodeData["category"];
+  riskScore: number;
+  branches: Array<{
+    label: string;
+    category: FlowNodeData["category"];
+    risk: number;
+    subNodes: Array<{ label: string; category: FlowNodeData["category"]; risk: number }>;
+  }>;
+}> = {
+  "0xd8da6bf26964af9d7eed9e03e53415d37aa96045": {
+    label: "Vitalik Buterin (vitalik.eth)",
+    category: "target",
+    riskScore: 8,
+    branches: [
+      {
+        label: "Ethereum Foundation Safe",
+        category: "storage",
+        risk: 2,
+        subNodes: [
+          { label: "Gitcoin Grants Vault", category: "wallet", risk: 1 },
+          { label: "Kanro Biotech Grant", category: "wallet", risk: 2 },
+        ],
+      },
+      {
+        label: "Uniswap V3: WETH / DAI",
+        category: "dex",
+        risk: 12,
+        subNodes: [
+          { label: "MakerDAO Collateral Vault", category: "lending", risk: 5 },
+          { label: "CowSwap MEV Settlement", category: "dex", risk: 10 },
+        ],
+      },
+      {
+        label: "Vitalik Cold Safe (MultiSig)",
+        category: "storage",
+        risk: 1,
+        subNodes: [
+          { label: "Lido Staked ETH (stETH)", category: "storage", risk: 3 },
+          { label: "Optimism Bridge Deposit", category: "wallet", risk: 4 },
+        ],
+      },
+    ],
+  },
+  "0x12d66f87a04a9e220743712ce6d9bb1b5616b8fc": {
+    label: "Tornado.Cash: 0.1 ETH Pool",
+    category: "mixer",
+    riskScore: 98,
+    branches: [
+      {
+        label: "Tornado Relayer Node 0x3b",
+        category: "mixer",
+        risk: 95,
+        subNodes: [
+          { label: "Peel Chain Splitter #1", category: "mixer", risk: 92 },
+          { label: "Lazarus Sub-Relay Outflow", category: "mixer", risk: 99 },
+        ],
+      },
+      {
+        label: "Railgun Privacy Bridge",
+        category: "mixer",
+        risk: 94,
+        subNodes: [
+          { label: "Hop Exchange Relayer", category: "dex", risk: 80 },
+          { label: "Anonymized Transit Wallet", category: "wallet", risk: 88 },
+        ],
+      },
+      {
+        label: "Binance Flagged Inflow Alert",
+        category: "cex",
+        risk: 90,
+        subNodes: [
+          { label: "Frozen Deposit Quarantine", category: "cex", risk: 96 },
+          { label: "OTC Splitter Cash-out", category: "wallet", risk: 91 },
+        ],
+      },
+    ],
+  },
+  "0xe592427a0aece92de3edee1f18e0157c05861564": {
+    label: "Uniswap V3: SwapRouter",
+    category: "dex",
+    riskScore: 10,
+    branches: [
+      {
+        label: "USDC / WETH 0.05% Pool",
+        category: "dex",
+        risk: 8,
+        subNodes: [
+          { label: "1inch Aggregator V5", category: "dex", risk: 10 },
+          { label: "Arbitrage Flashbot #82", category: "dex", risk: 25 },
+        ],
+      },
+      {
+        label: "WBTC / ETH 0.3% Pool",
+        category: "dex",
+        risk: 12,
+        subNodes: [
+          { label: "Curve.fi 3pool Inflow", category: "dex", risk: 10 },
+          { label: "Aave V3 Flash Liquidity", category: "lending", risk: 15 },
+        ],
+      },
+      {
+        label: "Uniswap V3 Factory",
+        category: "dex",
+        risk: 5,
+        subNodes: [
+          { label: "Liquidity Provider Safe", category: "storage", risk: 4 },
+          { label: "Settled Protocol Fees", category: "wallet", risk: 3 },
+        ],
+      },
+    ],
+  },
+  "0x28c6c06298d514db089934071355e5743bf21d60": {
+    label: "Binance: Hot Wallet 14",
+    category: "cex",
+    riskScore: 22,
+    branches: [
+      {
+        label: "Binance Cold Storage Vault #3",
+        category: "storage",
+        risk: 4,
+        subNodes: [
+          { label: "Institutional Custody Pool", category: "storage", risk: 3 },
+          { label: "Reserve Settlement Safe", category: "storage", risk: 2 },
+        ],
+      },
+      {
+        label: "Binance User Deposit Sweeper",
+        category: "cex",
+        risk: 18,
+        subNodes: [
+          { label: "Retail Inflow Aggregator", category: "cex", risk: 15 },
+          { label: "VIP Trading Account Sweep", category: "wallet", risk: 20 },
+        ],
+      },
+      {
+        label: "Binance Bridge (BNB Chain)",
+        category: "cex",
+        risk: 25,
+        subNodes: [
+          { label: "Cross-Chain Relayer Node", category: "dex", risk: 20 },
+          { label: "Internal Liquidity Rebalance", category: "cex", risk: 10 },
+        ],
+      },
+    ],
+  },
+  "0xeb9863e28d0fc0702a5197e66674f86ee2c35b5e": {
+    label: "Sanctioned Entity Outflow (OFAC)",
+    category: "target",
+    riskScore: 98,
+    branches: [
+      {
+        label: "Tornado.Cash Relayer 0x4a",
+        category: "mixer",
+        risk: 97,
+        subNodes: [
+          { label: "Peel Chain Split Relayer", category: "mixer", risk: 94 },
+          { label: "Obfuscated Transit Node", category: "wallet", risk: 91 },
+        ],
+      },
+      {
+        label: "Uniswap V3 Instant Liquidity",
+        category: "dex",
+        risk: 85,
+        subNodes: [
+          { label: "Tether USDT Blacklist Flag", category: "cex", risk: 99 },
+          { label: "MEV Sandwich Extractor", category: "dex", risk: 65 },
+        ],
+      },
+      {
+        label: "Relay Wallet to CEX Deposit",
+        category: "cex",
+        risk: 92,
+        subNodes: [
+          { label: "Suspicious Deposit Quarantine", category: "cex", risk: 95 },
+          { label: "Cold Storage Eviction Safe", category: "storage", risk: 88 },
+        ],
+      },
+    ],
+  },
+};
+
+export function getKnownEntityLabel(address: string | null | undefined): string {
+  if (!address) return "None selected";
+  const clean = address.toLowerCase();
+  if (KNOWN_ENTITIES[clean]) {
+    return KNOWN_ENTITIES[clean].label;
+  }
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
 /* ─── Custom Flow Node Component with Wide Aesthetics & Free Draggability ─── */
@@ -136,7 +329,7 @@ function CustomFlowNode({ data }: NodeProps<Node<FlowNodeData>>) {
   return (
     <div
       onClick={handleClick}
-      className={`group relative rounded-2xl border p-3.5 w-[230px] cursor-grab active:cursor-grabbing transition-all duration-200 select-none ${config.bg} ${config.border}`}
+      className={`group relative rounded-2xl border p-3.5 w-[240px] cursor-grab active:cursor-grabbing transition-all duration-200 select-none ${config.bg} ${config.border}`}
     >
       {/* React Flow Top Handle */}
       <Handle
@@ -170,7 +363,7 @@ function CustomFlowNode({ data }: NodeProps<Node<FlowNodeData>>) {
 
       {/* Label / Entity Name */}
       <div className="mb-2">
-        <h4 className={`text-xs font-bold font-heading truncate ${config.accentText}`}>
+        <h4 className={`text-xs font-bold font-heading truncate ${config.accentText}`} title={data.label}>
           {data.label}
         </h4>
       </div>
@@ -211,34 +404,19 @@ const nodeTypes = {
   flowNode: CustomFlowNode,
 };
 
-/* ─── Spacious Tree Layout Generator ─── */
+/* ─── Spacious Tree Layout Generator (With Exact Known Entity Support) ─── */
 function generateSpaciousTreeTopology(targetAddr: string): { nodes: Node[]; edges: Edge[] } {
-  const targetLower = targetAddr.toLowerCase();
-  
+  const cleanAddr = targetAddr.toLowerCase();
+  const known = KNOWN_ENTITIES[cleanAddr];
+
   let seed = 0;
-  for (let i = 0; i < targetLower.length; i++) {
-    seed = (seed * 31 + targetLower.charCodeAt(i)) & 0xffffffff;
+  for (let i = 0; i < cleanAddr.length; i++) {
+    seed = (seed * 31 + cleanAddr.charCodeAt(i)) & 0xffffffff;
   }
   const pseudoRand = (offset: number) => {
     const x = Math.sin(seed + offset) * 10000;
     return x - Math.floor(x);
   };
-
-  const branchProtocols = [
-    { label: "Uniswap V3 Router", category: "dex" as const, risk: 15 },
-    { label: "Tornado.Cash Relayer", category: "mixer" as const, risk: 94 },
-    { label: "Binance Hot Deposit", category: "cex" as const, risk: 25 },
-    { label: "Aave V3 Collateral", category: "lending" as const, risk: 20 },
-  ];
-
-  const subNodesPool = [
-    { label: "Settled Inflow", category: "wallet" as const, risk: 10 },
-    { label: "Cold Storage Safe", category: "storage" as const, risk: 5 },
-    { label: "Split Relay Node", category: "mixer" as const, risk: 88 },
-    { label: "Arbitrage Flashbot", category: "dex" as const, risk: 35 },
-    { label: "Curve.fi LP Pool", category: "dex" as const, risk: 12 },
-    { label: "Kraken Settlement", category: "cex" as const, risk: 20 },
-  ];
 
   const nodes: Node[] = [];
   const edges: Edge[] = [];
@@ -247,29 +425,61 @@ function generateSpaciousTreeTopology(targetAddr: string): { nodes: Node[]; edge
   const rootX = 580;
   const rootY = 40;
 
+  const rootLabel = known ? known.label : `Target (${cleanAddr.slice(0, 6)}...${cleanAddr.slice(-4)})`;
+  const rootCategory = known ? known.category : "target";
+  const rootRisk = known ? known.riskScore : 65;
+
   nodes.push({
-    id: targetLower,
+    id: cleanAddr,
     type: "flowNode",
     position: { x: rootX, y: rootY },
     draggable: true,
     data: {
-      label: `Target Probe (${targetLower.slice(0, 6)}...${targetLower.slice(-4)})`,
-      address: targetLower,
-      category: "target",
-      riskScore: 68,
+      label: rootLabel,
+      address: cleanAddr,
+      category: rootCategory,
+      riskScore: rootRisk,
       isTarget: true,
     },
   });
 
-  // Level 1: 3 Spacious Branches
-  const numHops1 = 3;
-  const hop1Spacing = 440; // Wide horizontal gap between Level 1 nodes
-  const startHop1X = rootX - ((numHops1 - 1) * hop1Spacing) / 2;
-  const hop1Y = 270; // 230px vertical gap
+  // If we have custom branches for this known entity, use them!
+  const branches = known?.branches || [
+    {
+      label: "Uniswap V3 Router",
+      category: "dex" as const,
+      risk: 15,
+      subNodes: [
+        { label: "Arbitrage Flashbot", category: "dex" as const, risk: 35 },
+        { label: "Curve.fi LP Pool", category: "dex" as const, risk: 12 },
+      ],
+    },
+    {
+      label: "Tornado.Cash Relayer",
+      category: "mixer" as const,
+      risk: 94,
+      subNodes: [
+        { label: "Split Relay Node", category: "mixer" as const, risk: 88 },
+        { label: "Cold Storage Safe", category: "storage" as const, risk: 5 },
+      ],
+    },
+    {
+      label: "Binance Hot Deposit",
+      category: "cex" as const,
+      risk: 25,
+      subNodes: [
+        { label: "Settled Inflow", category: "wallet" as const, risk: 10 },
+        { label: "Kraken Settlement", category: "cex" as const, risk: 20 },
+      ],
+    },
+  ];
 
-  for (let i = 0; i < numHops1; i++) {
-    const protoIndex = Math.floor(pseudoRand(i + 1) * branchProtocols.length) % branchProtocols.length;
-    const proto = branchProtocols[protoIndex];
+  const numHops1 = branches.length;
+  const hop1Spacing = 440;
+  const startHop1X = rootX - ((numHops1 - 1) * hop1Spacing) / 2;
+  const hop1Y = 270;
+
+  branches.forEach((b, i) => {
     const hop1Addr = `0x${Array.from({ length: 40 }, (_, k) =>
       Math.floor(pseudoRand(k + i * 10) * 16).toString(16)
     ).join("")}`;
@@ -283,20 +493,20 @@ function generateSpaciousTreeTopology(targetAddr: string): { nodes: Node[]; edge
       position: { x: hop1X, y: hop1Y },
       draggable: true,
       data: {
-        label: proto.label,
+        label: b.label,
         address: hop1Addr,
-        category: proto.category,
-        riskScore: proto.risk,
+        category: b.category,
+        riskScore: b.risk,
         ethAmount: `${eth1} ETH`,
       },
     });
 
-    const isHighRisk = proto.risk >= 70;
+    const isHighRisk = b.risk >= 70;
     const stroke = isHighRisk ? "#ff2d87" : "#00d2ff";
 
     edges.push({
       id: `edge_root_${i}`,
-      source: targetLower,
+      source: cleanAddr,
       target: hop1Addr,
       label: `${eth1} ETH`,
       type: "smoothstep",
@@ -307,19 +517,18 @@ function generateSpaciousTreeTopology(targetAddr: string): { nodes: Node[]; edge
       labelBgStyle: { fill: "#131424", fillOpacity: 0.95, stroke, strokeWidth: 1, rx: 6, ry: 6 },
     });
 
-    // Level 2: 2 Sub-nodes per hop 1, spaced generously underneath
-    const numSub = 2;
-    const subGap = 210; // Clearance between sibling sub-nodes
-    const hop2Y = 530; // 260px vertical clearance from hop1
+    // Sub-nodes
+    const subNodes = b.subNodes || [];
+    const numSub = subNodes.length;
+    const subGap = 210;
+    const hop2Y = 530;
 
-    for (let j = 0; j < numSub; j++) {
-      const subIndex = Math.floor(pseudoRand(j + i * 5 + 50) * subNodesPool.length) % subNodesPool.length;
-      const sub = subNodesPool[subIndex];
+    subNodes.forEach((sub, j) => {
       const hop2Addr = `0x${Array.from({ length: 40 }, (_, k) =>
         Math.floor(pseudoRand(k + j * 7 + i * 13) * 16).toString(16)
       ).join("")}`;
 
-      const subOffset = (j === 0 ? -subGap / 2 : subGap / 2);
+      const subOffset = j === 0 ? -subGap / 2 : subGap / 2;
       const hop2X = hop1X + subOffset;
       const eth2 = (parseFloat(eth1) * (pseudoRand(j + 70) * 0.5 + 0.3)).toFixed(2);
 
@@ -351,8 +560,8 @@ function generateSpaciousTreeTopology(targetAddr: string): { nodes: Node[]; edge
         labelStyle: { fill: subStroke, fontSize: 9, fontFamily: "monospace", fontWeight: 700 },
         labelBgStyle: { fill: "#131424", fillOpacity: 0.95, stroke: subStroke, strokeWidth: 1, rx: 6, ry: 6 },
       });
-    }
-  }
+    });
+  });
 
   return { nodes, edges };
 }
@@ -431,6 +640,7 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
     (targetAddr: string, mode: "tree" | "orbit" = layoutMode) => {
       setLoading(true);
       const cleanAddr = targetAddr.toLowerCase();
+      const known = KNOWN_ENTITIES[cleanAddr];
 
       fetch(`/api/graph/${cleanAddr}?hops=2`)
         .then((res) => {
@@ -441,15 +651,18 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
           if (data && Array.isArray(data.nodes) && data.nodes.length > 0) {
             const transformedNodes: Node[] = data.nodes.map((n: any, idx: number) => {
               const isTarget = n.id.toLowerCase() === cleanAddr;
-              const label = n.data?.label || n.label || `${n.id.slice(0, 6)}...${n.id.slice(-4)}`;
+              let label = n.data?.label || n.label || `${n.id.slice(0, 6)}...${n.id.slice(-4)}`;
+              if (isTarget && known) {
+                label = known.label;
+              }
               const labelLower = label.toLowerCase();
 
               let category: FlowNodeData["category"] = "wallet";
               let risk = 20;
 
               if (isTarget) {
-                category = "target";
-                risk = 68;
+                category = known ? known.category : "target";
+                risk = known ? known.riskScore : 68;
               } else if (labelLower.includes("mixer") || labelLower.includes("tornado") || labelLower.includes("railgun")) {
                 category = "mixer";
                 risk = 95;
@@ -464,7 +677,6 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
                 risk = 5;
               }
 
-              // Spacious grid layout calculation for backend data
               let pos = n.position;
               if (!pos || (pos.x === 0 && pos.y === 0)) {
                 if (isTarget) {
@@ -571,6 +783,8 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
     fitView({ padding: 0.35, duration: 500 });
   }, [fitView]);
 
+  const activeDisplayLabel = getKnownEntityLabel(activeTarget);
+
   return (
     <div
       className={`w-full h-full bg-[#1b1c33] rounded-[2rem] relative overflow-hidden border border-white/5 flex flex-col transition-all duration-300 shadow-2xl ${
@@ -594,11 +808,11 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
           </div>
         </div>
 
-        {/* Center Target badge */}
+        {/* Center Target badge with exact entity name */}
         {activeTarget && (
           <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
             <span className="text-[10px] text-white/40 uppercase">Target Probe:</span>
-            <strong className="text-white font-bold">{activeTarget}</strong>
+            <strong className="text-white font-bold">{activeDisplayLabel}</strong>
           </div>
         )}
 
@@ -666,7 +880,7 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
             <div className="flex flex-col items-center gap-3">
               <div className="w-8 h-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin shadow-[0_0_15px_#22d3ee]" />
               <span className="text-xs font-mono text-cyan-300 font-bold">
-                Tracing fund topology for {activeTarget.slice(0, 10)}...
+                Tracing fund topology for {activeDisplayLabel}...
               </span>
             </div>
           </div>
