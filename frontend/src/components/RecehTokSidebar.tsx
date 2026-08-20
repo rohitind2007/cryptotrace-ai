@@ -10,7 +10,7 @@ import collapseIcon from '../assets/cryptodash/Collapse Icon.png';
 import logoImg from '../assets/cryptodash/Logo.png';
 import giftIllustration from '../assets/cryptodash/Icon Illustrations.png';
 
-export type TabType = 'terminal' | 'investigation' | 'threats' | 'node' | 'admin';
+export type TabType = 'terminal' | 'investigation' | 'threats' | 'node';
 
 interface SidebarProps {
   activeTab: TabType;
@@ -71,13 +71,6 @@ export default function RecehTokSidebar({
       id: 'node' as TabType,
       label: 'System & Node',
       sublabel: 'ML Model Telemetry',
-      icon: accountIcon,
-      badge: null,
-    },
-    {
-      id: 'admin' as TabType,
-      label: 'Admin',
-      sublabel: 'Configuration & Tools',
       icon: accountIcon,
       badge: null,
     },

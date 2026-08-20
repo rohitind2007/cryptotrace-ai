@@ -397,28 +397,6 @@ export default function App() {
            )}
 
            {/* ─── Tab View 5: Admin Panel ─── */}
-           {activeTab === 'admin' && (
-             <motion.div
-               initial={{ opacity: 0, y: 15 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.4 }}
-               className="p-6 lg:p-8 rounded-[2rem] bg-[#1b1c33] border border-white/5 space-y-6"
-             >
-               <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                 <div>
-                   <h3 className="text-xl font-heading font-bold text-white">
-                     Admin <span className="gradient-text">Configuration Panel</span>
-                   </h3>
-                   <p className="text-xs text-white/40 font-mono mt-0.5">
-                     Administrative tools and external resources for system management
-                   </p>
-                 </div>
-                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-mono">
-                   <Shield size={13} /> ADMIN ACCESS
-                 </span>
-               </div>
-             </motion.div>
-           )}
         </main>
       </div>
 
