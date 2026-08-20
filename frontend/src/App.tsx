@@ -221,6 +221,28 @@ export default function App() {
           {/* ─── Tab View 1: RecehTok Main Dashboard ─── */}
           {activeTab === 'terminal' && (
             <div className="flex flex-col gap-6">
+              <div className="p-5 rounded-[1.75rem] bg-[#1b1c33] border border-white/5 shadow-xl">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-heading font-bold text-white">
+                      Indian Government Cyber Security
+                    </h2>
+                    <p className="text-sm text-white/60 font-mono mt-1">
+                      Access the Ministry of Home Affairs Cyber Crime Cell for reporting and resource information
+                    </p>
+                  </div>
+                  <a
+                    href="https://cybercrime.gov.in/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-300 hover:text-blue-100 hover:bg-blue-500/30 hover:border-blue-500/60 text-xs font-mono font-bold transition-all cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                  >
+                    <ArrowRight size={14} />
+                    Visit Cybercrime.gov.in
+                  </a>
+                </div>
+              </div>
+
               {/* 1. WALLETS Cards Row */}
               <RecehTokWalletsRow
                 volumeEth={totalVolume}
@@ -394,26 +416,6 @@ export default function App() {
                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-mono">
                    <Shield size={13} /> ADMIN ACCESS
                  </span>
-               </div>
-
-               <div className="max-w-3xl">
-                 <div className="p-6 bg-[#131424] rounded-2xl border border-white/5 space-y-4 flex flex-col">
-                   <div>
-                     <h4 className="text-sm font-bold text-white mb-1">Indian Government Cyber Security</h4>
-                     <p className="text-xs text-white/40 font-mono">
-                       Access the Ministry of Home Affairs Cyber Crime Cell for reporting and resource information
-                     </p>
-                   </div>
-                   <a
-                     href="https://cybercrime.gov.in/"
-                     target="_blank"
-                     rel="noopener noreferrer"
-                     className="mt-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-300 hover:text-blue-100 hover:bg-blue-500/30 hover:border-blue-500/60 text-xs font-mono font-bold transition-all cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]"
-                   >
-                     <ArrowRight size={14} />
-                     Visit Cybercrime.gov.in
-                   </a>
-                 </div>
                </div>
              </motion.div>
            )}
