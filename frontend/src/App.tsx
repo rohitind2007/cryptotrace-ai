@@ -22,6 +22,7 @@ import {
   Database,
   Search,
   ShieldAlert,
+  Shield,
   ArrowRight,
   GitFork
 } from "lucide-react";
