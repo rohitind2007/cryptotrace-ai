@@ -76,7 +76,7 @@ export default function RecehTokSidebar({
     },
     {
       id: 'admin' as TabType,
-      label: 'Admin Panel',
+      label: 'Admin',
       sublabel: 'Configuration & Tools',
       icon: accountIcon,
       badge: null,

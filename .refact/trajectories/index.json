@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-08-20T07:18:22.903391500+00:00",
+  "entries": [
+    {
+      "id": "73c9f1dc-4095-40ab-a53f-2bba8fd235fb",
+      "file_name": "73c9f1dc-4095-40ab-a53f-2bba8fd235fb.json",
+      "source": {
+        "kind": "normal"
+      },
+      "created_at": "2026-08-20T07:13:07.340604300+00:00",
+      "updated_at": "2026-08-20T07:18:22.865697400+00:00",
+      "title": "can you put this visit cybersecurity inside the admin tab in...",
+      "model": "google_gemini/gemini-3.7-flash",
+      "mode": "agent",
+      "message_count": 10,
+      "root_chat_id": "73c9f1dc-4095-40ab-a53f-2bba8fd235fb",
+      "is_title_generated": true,
+      "total_lines_added": 0,
+      "total_lines_removed": 0,
+      "tasks_total": 0,
+      "tasks_done": 0,
+      "tasks_failed": 0,
+      "total_prompt_tokens": 4038,
+      "total_completion_tokens": 36,
+      "total_tokens": 24154,
+      "total_cache_read_tokens": 20080,
+      "total_cache_creation_tokens": 0,
+      "total_cost_usd": 0.0046695,
+      "displayable_chat": true,
+      "waiting_for_card_ids": [],
+      "file_len": 268665,
+      "file_modified_unix_ms": 1787210302872
+    }
+  ]
+}

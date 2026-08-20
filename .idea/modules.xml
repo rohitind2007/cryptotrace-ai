@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/eth-fraud-analysis.iml" filepath="$PROJECT_DIR$/.idea/eth-fraud-analysis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/CryptoTrace_AI.iml" filepath="$PROJECT_DIR$/.idea/CryptoTrace_AI.iml" />
     </modules>
   </component>
 </project>
