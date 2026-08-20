@@ -396,7 +396,7 @@ export default function App() {
                  </span>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="max-w-3xl">
                  <div className="p-6 bg-[#131424] rounded-2xl border border-white/5 space-y-4 flex flex-col">
                    <div>
                      <h4 className="text-sm font-bold text-white mb-1">Indian Government Cyber Security</h4>
@@ -413,26 +413,6 @@ export default function App() {
                      <ArrowRight size={14} />
                      Visit Cybercrime.gov.in
                    </a>
-                 </div>
-
-                 <div className="p-6 bg-[#131424] rounded-2xl border border-white/5 space-y-4">
-                   <div>
-                     <h4 className="text-sm font-bold text-white mb-1">Quick Links</h4>
-                     <p className="text-xs text-white/40 font-mono">
-                       Fast access to common administrative functions
-                     </p>
-                   </div>
-                   <div className="space-y-2 pt-2">
-                     <button className="w-full px-4 py-2 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-300 text-xs font-mono transition-all cursor-pointer">
-                       View System Logs
-                     </button>
-                     <button className="w-full px-4 py-2 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 text-xs font-mono transition-all cursor-pointer">
-                       User Management
-                     </button>
-                     <button className="w-full px-4 py-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-300 text-xs font-mono transition-all cursor-pointer">
-                       API Configuration
-                     </button>
-                   </div>
                  </div>
                </div>
              </motion.div>
