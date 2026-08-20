@@ -331,47 +331,111 @@ export default function App() {
             </div>
           )}
 
-          {/* ─── Tab View 4: System & Node Health ─── */}
-          {activeTab === 'node' && (
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="p-6 lg:p-8 rounded-[2rem] bg-[#1b1c33] border border-white/5 space-y-6"
-            >
-              <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                <div>
-                  <h3 className="text-xl font-heading font-bold text-white">
-                    System & <span className="gradient-text">Node Sentinel Architecture</span>
-                  </h3>
-                  <p className="text-xs text-white/40 font-mono mt-0.5">
-                    Real-time telemetry and engine configuration for Ethereum ingestion
-                  </p>
-                </div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
-                  <CheckCircle2 size={13} /> ALL SYSTEMS OPERATIONAL
-                </span>
-              </div>
+               {/* ─── Tab View 4: System & Node Health ─── */}
+           {activeTab === 'node' && (
+             <motion.div
+               initial={{ opacity: 0, y: 15 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.4 }}
+               className="p-6 lg:p-8 rounded-[2rem] bg-[#1b1c33] border border-white/5 space-y-6"
+             >
+               <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                 <div>
+                   <h3 className="text-xl font-heading font-bold text-white">
+                     System & <span className="gradient-text">Node Sentinel Architecture</span>
+                   </h3>
+                   <p className="text-xs text-white/40 font-mono mt-0.5">
+                     Real-time telemetry and engine configuration for Ethereum ingestion
+                   </p>
+                 </div>
+                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
+                   <CheckCircle2 size={13} /> ALL SYSTEMS OPERATIONAL
+                 </span>
+               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
-                <div className="p-5 bg-[#131424] rounded-2xl border border-white/5 space-y-2">
-                  <span className="text-white/40 block text-[10px] uppercase tracking-wider">Web3 Ingestion</span>
-                  <span className="text-emerald-400 font-bold text-base block">ACTIVE (Ethereum Mainnet)</span>
-                  <span className="text-[11px] text-white/40 block">Public HTTP JSON-RPC Protocol (Poll: 3.5s)</span>
-                </div>
-                <div className="p-5 bg-[#131424] rounded-2xl border border-white/5 space-y-2">
-                  <span className="text-white/40 block text-[10px] uppercase tracking-wider">ML Anomaly Engine</span>
-                  <span className="gradient-text font-bold text-base block">IsolationForest Heuristics</span>
-                  <span className="text-[11px] text-white/40 block">Contamination threshold: 5.0% Outliers</span>
-                </div>
-                <div className="p-5 bg-[#131424] rounded-2xl border border-white/5 space-y-2">
-                  <span className="text-white/40 block text-[10px] uppercase tracking-wider">Storage Engine</span>
-                  <span className="text-cyber-rose font-bold text-base block">Neon PostgreSQL</span>
-                  <span className="text-[11px] text-white/40 block">Auto-syncing forensic ledger logs</span>
-                </div>
-              </div>
-            </motion.div>
-          )}
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+                 <div className="p-5 bg-[#131424] rounded-2xl border border-white/5 space-y-2">
+                   <span className="text-white/40 block text-[10px] uppercase tracking-wider">Web3 Ingestion</span>
+                   <span className="text-emerald-400 font-bold text-base block">ACTIVE (Ethereum Mainnet)</span>
+                   <span className="text-[11px] text-white/40 block">Public HTTP JSON-RPC Protocol (Poll: 3.5s)</span>
+                 </div>
+                 <div className="p-5 bg-[#131424] rounded-2xl border border-white/5 space-y-2">
+                   <span className="text-white/40 block text-[10px] uppercase tracking-wider">ML Anomaly Engine</span>
+                   <span className="gradient-text font-bold text-base block">IsolationForest Heuristics</span>
+                   <span className="text-[11px] text-white/40 block">Contamination threshold: 5.0% Outliers</span>
+                 </div>
+                 <div className="p-5 bg-[#131424] rounded-2xl border border-white/5 space-y-2">
+                   <span className="text-white/40 block text-[10px] uppercase tracking-wider">Storage Engine</span>
+                   <span className="text-cyber-rose font-bold text-base block">Neon PostgreSQL</span>
+                   <span className="text-[11px] text-white/40 block">Auto-syncing forensic ledger logs</span>
+                 </div>
+               </div>
+             </motion.div>
+           )}
+
+           {/* ─── Tab View 5: Admin Panel ─── */}
+           {activeTab === 'admin' && (
+             <motion.div
+               initial={{ opacity: 0, y: 15 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.4 }}
+               className="p-6 lg:p-8 rounded-[2rem] bg-[#1b1c33] border border-white/5 space-y-6"
+             >
+               <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                 <div>
+                   <h3 className="text-xl font-heading font-bold text-white">
+                     Admin <span className="gradient-text">Configuration Panel</span>
+                   </h3>
+                   <p className="text-xs text-white/40 font-mono mt-0.5">
+                     Administrative tools and external resources for system management
+                   </p>
+                 </div>
+                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-mono">
+                   <Shield size={13} /> ADMIN ACCESS
+                 </span>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="p-6 bg-[#131424] rounded-2xl border border-white/5 space-y-4 flex flex-col">
+                   <div>
+                     <h4 className="text-sm font-bold text-white mb-1">Indian Government Cyber Security</h4>
+                     <p className="text-xs text-white/40 font-mono">
+                       Access the Ministry of Home Affairs Cyber Crime Cell for reporting and resource information
+                     </p>
+                   </div>
+                   <a
+                     href="https://cybercrime.gov.in/"
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     className="mt-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-300 hover:text-blue-100 hover:bg-blue-500/30 hover:border-blue-500/60 text-xs font-mono font-bold transition-all cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                   >
+                     <ArrowRight size={14} />
+                     Visit Cybercrime.gov.in
+                   </a>
+                 </div>
+
+                 <div className="p-6 bg-[#131424] rounded-2xl border border-white/5 space-y-4">
+                   <div>
+                     <h4 className="text-sm font-bold text-white mb-1">Quick Links</h4>
+                     <p className="text-xs text-white/40 font-mono">
+                       Fast access to common administrative functions
+                     </p>
+                   </div>
+                   <div className="space-y-2 pt-2">
+                     <button className="w-full px-4 py-2 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-300 text-xs font-mono transition-all cursor-pointer">
+                       View System Logs
+                     </button>
+                     <button className="w-full px-4 py-2 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 text-xs font-mono transition-all cursor-pointer">
+                       User Management
+                     </button>
+                     <button className="w-full px-4 py-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 text-cyan-300 text-xs font-mono transition-all cursor-pointer">
+                       API Configuration
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             </motion.div>
+           )}
         </main>
       </div>
 
