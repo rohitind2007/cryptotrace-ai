@@ -42,6 +42,17 @@ export default function MobileOrientationModal() {
     };
   }, []);
 
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        handleDismiss();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   const handleDismiss = () => {
     setIsOpen(false);
     sessionStorage.setItem('cryptotrace_orientation_dismissed', 'true');
@@ -51,13 +62,19 @@ export default function MobileOrientationModal() {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-5 select-none pointer-events-auto">
+      <div 
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-5 select-none pointer-events-auto modal-dialog-contain"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="orientation-title"
+      >
         {/* Dark blurred backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={handleDismiss}
+          aria-hidden="true"
           className="absolute inset-0 bg-[#0d0e1a]/90 backdrop-blur-lg"
         />
 
@@ -74,11 +91,12 @@ export default function MobileOrientationModal() {
 
           {/* Close 'X' Button */}
           <button
+            type="button"
             onClick={handleDismiss}
             aria-label="Close orientation suggestion"
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all cursor-pointer"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
 
           {/* Animated Rotating Phone Device Illustration */}
@@ -88,16 +106,16 @@ export default function MobileOrientationModal() {
               transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut", times: [0, 0.4, 0.8, 1] }}
               className="text-cyan-300"
             >
-              <Smartphone size={36} />
+              <Smartphone size={36} aria-hidden="true" />
             </motion.div>
             <div className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-[#ff2d87] text-white shadow-[0_0_10px_#ff2d87]">
-              <RotateCw size={12} className="animate-spin" />
+              <RotateCw size={12} className="animate-spin" aria-hidden="true" />
             </div>
           </div>
 
           {/* Text Content */}
           <div className="flex flex-col gap-1.5">
-            <h3 className="text-lg font-bold font-heading text-white tracking-tight">
+            <h3 id="orientation-title" className="text-lg font-bold font-heading text-white tracking-tight">
               Use Landscape Mode
             </h3>
             <p className="text-xs text-white/60 leading-relaxed font-sans px-2">
@@ -108,11 +126,12 @@ export default function MobileOrientationModal() {
           {/* Action Buttons */}
           <div className="flex flex-col w-full gap-2 mt-2">
             <button
+              type="button"
               onClick={handleDismiss}
-              className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#00d2ff] to-[#00a8ff] hover:from-[#00b4db] hover:to-[#00d2ff] text-black font-bold font-mono text-xs transition-all shadow-[0_0_15px_rgba(0,210,255,0.4)] cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#00d2ff] to-[#00a8ff] hover:from-[#00b4db] hover:to-[#00d2ff] text-black font-bold font-mono text-xs transition-[transform,background-color] duration-150 shadow-[0_0_15px_rgba(0,210,255,0.4)] cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <span>Continue in Portrait</span>
-              <ArrowRight size={14} />
+              <ArrowRight size={14} aria-hidden="true" />
             </button>
           </div>
         </motion.div>

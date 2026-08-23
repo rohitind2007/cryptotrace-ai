@@ -58,6 +58,17 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
     }
   }, [isOpen]);
 
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const filteredRecords = records.filter(
@@ -81,13 +92,19 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div 
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 modal-dialog-contain"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="db-modal-title"
+      >
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
+          aria-hidden="true"
           className="absolute inset-0 bg-[#0d0e1a]/85 backdrop-blur-md"
         />
 
@@ -106,10 +123,10 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
           <div className="p-6 border-b border-white/5 flex flex-wrap justify-between items-center gap-4 bg-[#171829]">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyber-cyan">
-                <Database size={20} />
+                <Database size={20} aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-lg font-bold font-heading text-white flex items-center gap-2">
+                <h2 id="db-modal-title" className="text-lg font-bold font-heading text-white flex items-center gap-2">
                   <span>Neon PostgreSQL Explorer</span>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
                     pg8000
@@ -124,13 +141,16 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Search */}
               <div className="relative flex items-center">
-                <Search size={14} className="absolute left-3 text-white/30" />
+                <Search size={14} className="absolute left-3 text-white/30 pointer-events-none" aria-hidden="true" />
                 <input
                   type="text"
-                  placeholder="Filter records..."
+                  aria-label="Filter database audit records"
+                  placeholder="Filter records…"
                   value={searchTerm}
+                  autoComplete="off"
+                  spellCheck={false}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-3 py-1.5 bg-[#131424] border border-white/10 rounded-full text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:border-cyan-400 w-36 sm:w-52"
+                  className="pl-9 pr-3 py-1.5 bg-[#131424] border border-white/10 rounded-full text-xs font-mono text-white placeholder-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 w-36 sm:w-52"
                 />
               </div>
 
@@ -139,62 +159,66 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
                 href="https://console.neon.tech"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 px-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(0,210,255,0.25)]"
-                title="Open Neon Cloud Console in new tab"
+                className="p-2 px-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 text-xs font-mono flex items-center gap-1.5 transition-colors duration-150 cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(0,210,255,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                aria-label="Open Neon Cloud Console in new tab"
               >
-                <ExternalLink size={14} />
+                <ExternalLink size={14} aria-hidden="true" />
                 <span className="hidden sm:inline font-bold">Neon Console</span>
               </a>
 
               {/* Export CSV */}
               <button
+                type="button"
                 onClick={handleExportCSV}
-                className="p-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer"
-                title="Export CSV"
+                className="p-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-mono flex items-center gap-1.5 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+                aria-label="Export audit ledger as CSV"
               >
-                <Download size={14} />
+                <Download size={14} aria-hidden="true" />
                 <span className="hidden sm:inline">Export</span>
               </button>
 
               {/* Refresh */}
               <button
+                type="button"
                 onClick={fetchRecords}
                 disabled={loading}
-                className="p-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 transition-all cursor-pointer"
-                title="Refresh from Neon"
+                className="p-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 transition-colors duration-150 cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                aria-label="Refresh records from Neon database"
               >
-                <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+                <RefreshCw size={14} className={loading ? "animate-spin" : ""} aria-hidden="true" />
               </button>
 
               {/* Close */}
               <button
+                type="button"
                 onClick={onClose}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all cursor-pointer"
+                aria-label="Close database explorer modal"
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
           </div>
 
           {/* Table Container */}
           <div className="flex-1 overflow-y-auto overflow-x-auto p-4 custom-scrollbar bg-[#131424]">
-            <table className="w-full text-left border-collapse min-w-[700px]">
+            <table className="w-full text-left border-collapse min-w-[700px]" aria-label="Persisted Forensic Database Records">
               <thead>
                 <tr className="border-b border-white/5 text-[10px] font-mono font-bold uppercase tracking-widest text-white/40">
-                  <th className="p-3">Tx Hash</th>
-                  <th className="p-3">Block</th>
-                  <th className="p-3">From / To</th>
-                  <th className="p-3">Value (ETH)</th>
-                  <th className="p-3">Risk Rating</th>
-                  <th className="p-3">Category</th>
+                  <th scope="col" className="p-3">Tx Hash</th>
+                  <th scope="col" className="p-3">Block</th>
+                  <th scope="col" className="p-3">From / To</th>
+                  <th scope="col" className="p-3">Value (ETH)</th>
+                  <th scope="col" className="p-3">Risk Rating</th>
+                  <th scope="col" className="p-3">Category</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-xs font-mono">
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="text-center py-12 text-white/40">
-                      <RefreshCw size={20} className="animate-spin mx-auto mb-2 text-cyber-cyan" />
-                      Loading records from Neon PostgreSQL...
+                      <RefreshCw size={20} className="animate-spin mx-auto mb-2 text-cyber-cyan" aria-hidden="true" />
+                      Loading records from Neon PostgreSQL…
                     </td>
                   </tr>
                 ) : filteredRecords.length === 0 ? (
@@ -205,19 +229,19 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
                   </tr>
                 ) : (
                   filteredRecords.map((r, idx) => (
-                    <tr key={idx} className="hover:bg-cyan-500/[0.04] transition-colors">
-                      <td className="p-3 text-cyan-300 font-bold">
-                        {r.tx_hash ? `${r.tx_hash.slice(0, 10)}...${r.tx_hash.slice(-6)}` : "0x0"}
+                    <tr key={idx} className="hover:bg-cyan-500/[0.04] transition-colors duration-150">
+                      <td className="p-3 text-cyan-300 font-bold tabular-nums">
+                        {r.tx_hash ? `${r.tx_hash.slice(0, 10)}…${r.tx_hash.slice(-6)}` : "0x0"}
                       </td>
-                      <td className="p-3 text-white/70">#{r.block_number}</td>
-                      <td className="p-3 text-white/70 text-[11px]">
-                        <span>{r.from ? `${r.from.slice(0, 6)}...` : ""}</span>
-                        <span className="text-cyan-400 mx-1">→</span>
-                        <span>{r.to ? `${r.to.slice(0, 6)}...` : "Contract"}</span>
+                      <td className="p-3 text-white/70 tabular-nums">#{r.block_number}</td>
+                      <td className="p-3 text-white/70 text-[11px] tabular-nums">
+                        <span>{r.from ? `${r.from.slice(0, 6)}…` : ""}</span>
+                        <span className="text-cyan-400 mx-1" aria-hidden="true">→</span>
+                        <span>{r.to ? `${r.to.slice(0, 6)}…` : "Contract"}</span>
                       </td>
-                      <td className="p-3 text-white font-bold">{r.value_eth} ETH</td>
+                      <td className="p-3 text-white font-bold tabular-nums">{r.value_eth} ETH</td>
                       <td className="p-3">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tabular-nums ${
                           r.risk_score >= 60 || r.is_suspicious
                             ? 'bg-[#ff2d87]/20 text-[#ff2d87] border border-[#ff2d87]/30'
                             : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
@@ -239,17 +263,17 @@ export default function DatabaseModal({ isOpen, onClose }: Props) {
           <div className="p-4 border-t border-white/5 bg-[#171829] flex flex-wrap justify-between items-center text-[10px] font-mono text-white/40 gap-2">
             <div className="flex items-center gap-2">
               <span>DATABASE: NEON CLOUD POSTGRESQL</span>
-              <span className="text-white/20">•</span>
+              <span className="text-white/20" aria-hidden="true">•</span>
               <a
                 href="https://console.neon.tech"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-cyan-400 hover:underline flex items-center gap-1"
+                className="text-cyan-400 hover:underline flex items-center gap-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
               >
-                console.neon.tech <ExternalLink size={10} />
+                <span>console.neon.tech</span> <ExternalLink size={10} aria-hidden="true" />
               </a>
             </div>
-            <span>SHOWING {filteredRecords.length} AUDIT LOGS</span>
+            <span className="tabular-nums">SHOWING {filteredRecords.length} AUDIT LOGS</span>
           </div>
         </motion.div>
       </div>

@@ -51,40 +51,49 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
       </div>
 
       {/* Center Navigation Tabs */}
-      <nav className="flex items-center gap-1 sm:gap-2 bg-black/40 p-1 sm:p-1.5 rounded-full border border-white/5">
+      <nav className="flex items-center gap-1 sm:gap-2 bg-black/40 p-1 sm:p-1.5 rounded-full border border-white/5" aria-label="Main system navigation">
         <button
+          type="button"
           onClick={() => onSelectTab('terminal')}
-          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-all duration-300 ${
+          aria-label="Switch to Terminal view"
+          aria-current={activeTab === 'terminal' ? 'page' : undefined}
+          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             activeTab === 'terminal'
               ? 'bg-white/10 text-cyber-cyan border border-cyber-cyan/40 glow-border-cyan'
               : 'text-white/60 hover:text-white hover:bg-white/5 border border-transparent'
           }`}
         >
-          <Terminal size={15} />
+          <Terminal size={15} aria-hidden="true" />
           <span>Terminal</span>
         </button>
 
         <button
+          type="button"
           onClick={() => onSelectTab('investigation')}
-          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-all duration-300 ${
+          aria-label="Switch to Trace Investigation view"
+          aria-current={activeTab === 'investigation' ? 'page' : undefined}
+          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             activeTab === 'investigation'
               ? 'bg-white/10 text-cyber-cyan border border-cyber-cyan/40 glow-border-cyan'
               : 'text-white/60 hover:text-white hover:bg-white/5 border border-transparent'
           }`}
         >
-          <Globe size={15} />
+          <Globe size={15} aria-hidden="true" />
           <span>Trace</span>
         </button>
 
         <button
+          type="button"
           onClick={() => onSelectTab('node')}
-          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-all duration-300 ${
+          aria-label="Switch to Node telemetry view"
+          aria-current={activeTab === 'node' ? 'page' : undefined}
+          className={`flex items-center gap-2 px-3 sm:px-5 lg:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-mono font-medium transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             activeTab === 'node'
               ? 'bg-white/10 text-cyber-cyan border border-cyber-cyan/40 glow-border-cyan'
               : 'text-white/60 hover:text-white hover:bg-white/5 border border-transparent'
           }`}
         >
-          <Radio size={15} />
+          <Radio size={15} aria-hidden="true" />
           <span>Node</span>
         </button>
       </nav>
@@ -94,42 +103,46 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
         {/* Neon SQL Table Explorer Button */}
         {onOpenDatabase && (
           <button
+            type="button"
             onClick={onOpenDatabase}
-            title="Open Neon PostgreSQL Explorer"
-            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 transition-all duration-300 text-xs font-mono group cursor-pointer glow-border-cyan hover:scale-[1.03]"
+            aria-label="Open Neon PostgreSQL database explorer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 transition-[transform,background-color] duration-150 text-xs font-mono group cursor-pointer glow-border-cyan hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            <Database size={13} className="text-cyber-cyan group-hover:scale-110 transition-transform" />
+            <Database size={13} className="text-cyber-cyan group-hover:scale-110 transition-transform duration-150" aria-hidden="true" />
             <span className="text-[10px] sm:text-xs font-bold hidden sm:inline">Neon SQL</span>
           </button>
         )}
 
         {/* Interactive Ping Response Button */}
         <button
+          type="button"
           onClick={checkPing}
-          title="Click to test live Ethereum RPC ping"
-          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-black/40 border border-white/10 hover:border-cyber-cyan/40 hover:bg-white/5 transition-all duration-300 text-xs font-mono group cursor-pointer hover:glow-border-cyan"
+          aria-label="Test live Ethereum RPC endpoint ping"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-black/40 border border-white/10 hover:border-cyber-cyan/40 hover:bg-white/5 transition-colors duration-150 text-xs font-mono group cursor-pointer hover:glow-border-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
         >
           <Activity
             size={13}
+            aria-hidden="true"
             className={`${
               latencyMs !== null && latencyMs < 120
                 ? 'text-emerald-400'
                 : latencyMs !== null && latencyMs < 300
                 ? 'text-yellow-400'
                 : 'text-rose-400'
-            } group-hover:scale-110 transition-transform`}
+            } group-hover:scale-110 transition-transform duration-150`}
           />
-          <span className="text-[10px] sm:text-xs font-bold text-white/90">
+          <span className="text-[10px] sm:text-xs font-bold text-white/90 tabular-nums">
             {latencyMs !== null ? `${latencyMs}ms` : '---'}
           </span>
           <RefreshCw
             size={11}
-            className={`text-white/30 group-hover:text-cyber-cyan transition-colors ${isPinging ? 'animate-spin' : ''}`}
+            aria-hidden="true"
+            className={`text-white/30 group-hover:text-cyber-cyan transition-colors duration-150 ${isPinging ? 'animate-spin' : ''}`}
           />
         </button>
 
         {/* Status Indicator */}
-        <div className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-white/10">
+        <div className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-white/10" role="status" aria-label={`Network status: ${status ? 'Online' : 'Offline'}`}>
           <div className="flex flex-col items-end">
             <span className="text-[8px] uppercase tracking-widest text-white/40 hidden sm:block">Status</span>
             <span className={`text-[10px] sm:text-xs font-bold tracking-wider font-mono ${status ? 'text-emerald-400' : 'text-cyber-rose'}`}>
@@ -140,7 +153,7 @@ export default function Navbar({ activeTab, onSelectTab, status, onOpenDatabase 
             status
               ? 'bg-emerald-400 animate-pulse ring-4 ring-emerald-400/20 shadow-[0_0_12px_rgba(52,211,153,0.4)]'
               : 'bg-rose-500 ring-4 ring-rose-500/20 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
-          }`} />
+          }`} aria-hidden="true" />
         </div>
       </div>
     </header>

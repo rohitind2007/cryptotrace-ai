@@ -1,0 +1,32 @@
+# Node / NPM
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# IDEs & System
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Python & Environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Logs & Temporary
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -65,45 +65,49 @@ export default function LiveFeedTable({ transactions, onSelectTx, onOpenReport }
 
       {/* Scrollable Table Container */}
       <div className="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
-        <table className="w-full text-left border-collapse min-w-[540px] md:min-w-full">
+        <table className="w-full text-left border-collapse min-w-[540px] md:min-w-full" aria-label="Live Ingested Ethereum Transactions Feed">
           <thead>
             <tr className="border-b border-white/5 bg-[#131424]/85 sticky top-0 backdrop-blur-md z-10">
-              <th className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 whitespace-nowrap">
+              <th scope="col" className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 whitespace-nowrap">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
                   <span>Tx Hash (Newest at Top)</span>
                 </div>
               </th>
-              <th className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 whitespace-nowrap">
+              <th scope="col" className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 whitespace-nowrap">
                 Origin / Target
               </th>
-              <th
-                onClick={() => toggleSort('value')}
-                className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 whitespace-nowrap cursor-pointer hover:text-white transition-colors"
-              >
-                <div className="flex items-center gap-1">
+              <th scope="col" aria-sort={sortField === 'value' ? (sortAsc ? 'ascending' : 'descending') : 'none'} className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 whitespace-nowrap">
+                <button
+                  type="button"
+                  onClick={() => toggleSort('value')}
+                  aria-label="Sort by ETH Value"
+                  className="flex items-center gap-1 cursor-pointer hover:text-white transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
+                >
                   <span>Value</span>
                   {sortField === 'value' ? (
-                    sortAsc ? <ArrowUp size={11} className="text-cyan-400" /> : <ArrowDown size={11} className="text-cyan-400" />
+                    sortAsc ? <ArrowUp size={11} className="text-cyan-400" aria-hidden="true" /> : <ArrowDown size={11} className="text-cyan-400" aria-hidden="true" />
                   ) : (
-                    <ArrowUpDown size={11} className="text-white/20" />
+                    <ArrowUpDown size={11} className="text-white/20" aria-hidden="true" />
                   )}
-                </div>
+                </button>
               </th>
-              <th
-                onClick={() => toggleSort('risk')}
-                className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 whitespace-nowrap cursor-pointer hover:text-white transition-colors"
-              >
-                <div className="flex items-center gap-1">
+              <th scope="col" aria-sort={sortField === 'risk' ? (sortAsc ? 'ascending' : 'descending') : 'none'} className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 whitespace-nowrap">
+                <button
+                  type="button"
+                  onClick={() => toggleSort('risk')}
+                  aria-label="Sort by Threat Risk Score"
+                  className="flex items-center gap-1 cursor-pointer hover:text-white transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-pink-400 rounded"
+                >
                   <span>Risk Score</span>
                   {sortField === 'risk' ? (
-                    sortAsc ? <ArrowUp size={11} className="text-pink-400" /> : <ArrowDown size={11} className="text-pink-400" />
+                    sortAsc ? <ArrowUp size={11} className="text-pink-400" aria-hidden="true" /> : <ArrowDown size={11} className="text-pink-400" aria-hidden="true" />
                   ) : (
-                    <ArrowUpDown size={11} className="text-white/20" />
+                    <ArrowUpDown size={11} className="text-white/20" aria-hidden="true" />
                   )}
-                </div>
+                </button>
               </th>
-              <th className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 text-right whitespace-nowrap">
+              <th scope="col" className="px-4 py-3.5 text-[10px] font-bold font-mono uppercase tracking-widest text-white/40 text-right whitespace-nowrap">
                 Action
               </th>
             </tr>
@@ -113,7 +117,7 @@ export default function LiveFeedTable({ transactions, onSelectTx, onOpenReport }
               <tr>
                 <td colSpan={5} className="text-center py-12 text-xs font-mono text-white/30">
                   <span className="inline-block px-6 py-2 rounded-lg bg-white/5 animate-pulse">
-                    Scanning live blocks for incoming transactions...
+                    Scanning live blocks for incoming transactions…
                   </span>
                 </td>
               </tr>
@@ -124,48 +128,55 @@ export default function LiveFeedTable({ transactions, onSelectTx, onOpenReport }
                 return (
                   <tr
                     key={tx.tx_hash}
+                    tabIndex={0}
                     onClick={() => onSelectTx(tx)}
-                    className={`group cursor-pointer hover:bg-cyan-500/[0.06] transition-colors duration-200 ${
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSelectTx(tx);
+                      }
+                    }}
+                    className={`group cursor-pointer hover:bg-cyan-500/[0.06] transition-colors duration-200 focus-visible:outline-none focus-visible:bg-cyan-500/[0.1] ${
                       isNew ? 'bg-cyan-500/[0.08]' : ''
                     }`}
                   >
                     {/* Tx Hash */}
                     <td className="px-4 py-3 text-xs font-mono text-cyan-300 group-hover:text-cyan-200">
-                      <div className="flex items-center gap-1.5 font-bold">
-                        <Hash size={12} className="text-cyan-400/60" />
-                        <span>{tx.tx_hash.slice(0, 10)}...{tx.tx_hash.slice(-6)}</span>
+                      <div className="flex items-center gap-1.5 font-bold tabular-nums">
+                        <Hash size={12} className="text-cyan-400/60" aria-hidden="true" />
+                        <span>{tx.tx_hash.slice(0, 10)}…{tx.tx_hash.slice(-6)}</span>
                       </div>
                     </td>
 
                     {/* From -> To */}
                     <td className="px-4 py-3 text-xs font-mono text-white/80">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-white/60">{tx.from.slice(0, 6)}...{tx.from.slice(-4)}</span>
-                        <span className="text-cyan-400">→</span>
-                        <span className="text-white font-medium">{tx.to ? `${tx.to.slice(0, 6)}...${tx.to.slice(-4)}` : 'Contract'}</span>
+                      <div className="flex items-center gap-1.5 tabular-nums">
+                        <span className="text-white/60">{tx.from.slice(0, 6)}…{tx.from.slice(-4)}</span>
+                        <span className="text-cyan-400" aria-hidden="true">→</span>
+                        <span className="text-white font-medium">{tx.to ? `${tx.to.slice(0, 6)}…${tx.to.slice(-4)}` : 'Contract'}</span>
                       </div>
                     </td>
 
                     {/* Value ETH */}
-                    <td className="px-4 py-3 text-xs font-mono font-bold text-white whitespace-nowrap">
+                    <td className="px-4 py-3 text-xs font-mono font-bold text-white whitespace-nowrap tabular-nums">
                       <span>{Number(tx.value_eth || 0).toFixed(4)} ETH</span>
                     </td>
 
                     {/* Risk Score */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tabular-nums ${
                         isHighRisk
                           ? 'bg-[#ff2d87]/20 text-[#ff2d87] border border-[#ff2d87]/40 shadow-[0_0_8px_#ff2d87]'
                           : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
                       }`}>
                         {isHighRisk ? (
                           <>
-                            <ShieldAlert size={11} />
+                            <ShieldAlert size={11} aria-hidden="true" />
                             <span>FLAGGED ({tx.risk_score}%)</span>
                           </>
                         ) : (
                           <>
-                            <CheckCircle2 size={11} />
+                            <CheckCircle2 size={11} aria-hidden="true" />
                             <span>LOW ({tx.risk_score || 12}%)</span>
                           </>
                         )}
@@ -175,11 +186,13 @@ export default function LiveFeedTable({ transactions, onSelectTx, onOpenReport }
                     {/* Action Button */}
                     <td className="px-4 py-3 text-right whitespace-nowrap">
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           onOpenReport(tx);
                         }}
-                        className="px-3 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-[11px] font-mono transition-all cursor-pointer font-bold"
+                        aria-label={`Inspect transaction ${tx.tx_hash.slice(0, 8)}`}
+                        className="px-3 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-[11px] font-mono transition-colors duration-150 cursor-pointer font-bold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
                       >
                         Inspect
                       </button>

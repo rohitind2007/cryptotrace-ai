@@ -44,12 +44,15 @@ export default function RecehTokHeader({
   };
 
   return (
-    <header className="w-full flex flex-wrap justify-between items-center gap-4 py-4 px-2 select-none relative">
+    <header 
+      aria-label="Dashboard Header"
+      className="w-full flex flex-wrap justify-between items-center gap-4 py-4 px-2 select-none relative"
+    >
       {/* Title & Subtitle */}
       <div className="flex flex-col">
         <h1 className="text-2xl font-bold text-white tracking-tight font-heading flex items-center gap-2.5">
           <span>{title}</span>
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold transition-all ${
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors duration-200 ${
             status
               ? 'bg-cyan-500/10 border border-cyan-500/30 text-cyber-cyan'
               : 'bg-rose-500/10 border border-rose-500/30 text-rose-400'
@@ -58,7 +61,7 @@ export default function RecehTokHeader({
               status
                 ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]'
                 : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'
-            }`} />
+            }`} aria-hidden="true" />
             {status ? 'LIVE MAINNET' : 'OFFLINE'}
           </span>
         </h1>
@@ -70,18 +73,21 @@ export default function RecehTokHeader({
       {/* Right Controls */}
       <div className="flex items-center gap-3">
         {/* Search Bar */}
-        <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+        <form onSubmit={handleSearchSubmit} className="relative flex items-center" role="search">
           <input
             type="text"
-            placeholder="Search address (0x...) or hash..."
+            aria-label="Search Ethereum address or transaction hash"
+            placeholder="Search address (0x…) or hash…"
             value={searchQuery}
+            autoComplete="off"
+            spellCheck={false}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               if (onSearch) onSearch(e.target.value);
             }}
-            className="w-48 sm:w-64 pl-8 pr-8 py-2 bg-[#1b1c33] border border-white/10 focus:border-cyan-400 rounded-full text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner"
+            className="w-48 sm:w-64 pl-8 pr-8 py-2 bg-[#1b1c33] border border-white/10 focus:border-cyan-400 rounded-full text-xs font-mono text-white placeholder-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-colors duration-200 shadow-inner"
           />
-          <Search size={13} className="absolute left-3 text-white/30 pointer-events-none" />
+          <Search size={13} className="absolute left-3 text-white/30 pointer-events-none" aria-hidden="true" />
           {searchQuery && (
             <button
               type="button"
@@ -89,7 +95,8 @@ export default function RecehTokHeader({
                 setSearchQuery('');
                 if (onSearch) onSearch('');
               }}
-              className="absolute right-3 text-white/40 hover:text-white text-xs cursor-pointer"
+              aria-label="Clear search input"
+              className="absolute right-3 text-white/40 hover:text-white text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
             >
               ×
             </button>
@@ -98,41 +105,47 @@ export default function RecehTokHeader({
 
         {/* Grid / Buffer Risk Heatmap Matrix Toggle Button */}
         <button
+          type="button"
           onClick={onToggleGridView}
-          className={`p-2.5 rounded-full border transition-all cursor-pointer ${
+          aria-label="Open Buffer Risk Heatmap Matrix (All 100 Transactions)"
+          className={`p-2.5 rounded-full border transition-[color,background-color,border-color,box-shadow] duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             isGridView
               ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(0,210,255,0.3)]'
               : 'bg-[#1b1c33] border-white/10 text-white/50 hover:text-white hover:border-white/20'
           }`}
-          title="Open Buffer Risk Heatmap Matrix (All 100 Transactions)"
         >
-          <Grid size={14} />
+          <Grid size={14} aria-hidden="true" />
         </button>
 
         {/* Refresh Feed Button */}
         <button
+          type="button"
           onClick={handleRefreshClick}
-          className="p-2.5 rounded-full bg-[#1b1c33] border border-white/10 hover:border-cyan-400/40 text-white/50 hover:text-cyan-300 transition-all cursor-pointer"
-          title="Force poll latest transactions"
+          aria-label="Force poll latest transactions"
+          className="p-2.5 rounded-full bg-[#1b1c33] border border-white/10 hover:border-cyan-400/40 text-white/50 hover:text-cyan-300 transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
         >
-          <RefreshCw size={14} className={isRefreshing ? 'animate-spin text-cyan-400' : ''} />
+          <RefreshCw size={14} className={isRefreshing ? 'animate-spin text-cyan-400' : ''} aria-hidden="true" />
         </button>
 
         {/* Pink Notification Pill Badge */}
         <button
+          type="button"
           onClick={onOpenAlerts}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#ff2d87] hover:bg-[#ff2d87]/90 text-white font-bold text-xs font-mono shadow-[0_0_15px_rgba(255,45,135,0.45)] transition-all cursor-pointer active:scale-95"
-          title="Open Threat Sentinel Alerts"
+          aria-label={`Open Threat Sentinel Alerts (${alertCount} active alerts)`}
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#ff2d87] hover:bg-[#ff2d87]/90 text-white font-bold text-xs font-mono shadow-[0_0_15px_rgba(255,45,135,0.45)] transition-[transform,background-color] duration-200 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400"
         >
-          <Bell size={13} />
-          <span>{alertCount > 0 ? alertCount : '0'}</span>
+          <Bell size={13} aria-hidden="true" />
+          <span className="tabular-nums">{alertCount > 0 ? alertCount : '0'}</span>
         </button>
 
         {/* User / Sentinel Admin Profile Dropdown */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center gap-2.5 pl-2 py-1 pr-2 rounded-full bg-[#1b1c33] hover:bg-[#23243f] border border-white/10 hover:border-white/20 transition-all cursor-pointer"
+            aria-label="Admin account menu"
+            aria-expanded={isProfileOpen}
+            className="flex items-center gap-2.5 pl-2 py-1 pr-2 rounded-full bg-[#1b1c33] hover:bg-[#23243f] border border-white/10 hover:border-white/20 transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-400 via-indigo-500 to-pink-500 p-[1.5px] shrink-0 shadow-md">
               <div className="w-full h-full rounded-full bg-[#131424] flex items-center justify-center font-bold text-[10px] font-mono text-cyan-300">
@@ -141,7 +154,7 @@ export default function RecehTokHeader({
             </div>
             <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-white tracking-wide">
               <span>Admin</span>
-              <ChevronDown size={12} className={`text-white/40 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={12} className={`text-white/40 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
             </div>
           </button>
 
@@ -158,36 +171,39 @@ export default function RecehTokHeader({
 
               {onOpenDatabase && (
                 <button
+                  type="button"
                   onClick={() => {
                     setIsProfileOpen(false);
                     onOpenDatabase();
                   }}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-all text-left cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
                 >
-                  <Database size={13} className="text-cyber-cyan" />
+                  <Database size={13} className="text-cyber-cyan" aria-hidden="true" />
                   <span>Neon SQL Explorer</span>
                 </button>
               )}
 
               <button
+                type="button"
                 onClick={() => {
                   setIsProfileOpen(false);
                   if (onOpenAlerts) onOpenAlerts();
                 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-all text-left cursor-pointer"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-400"
               >
-                <Shield size={13} className="text-rose-400" />
+                <Shield size={13} className="text-rose-400" aria-hidden="true" />
                 <span>Threat Sentinel Feed</span>
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   setIsProfileOpen(false);
                   handleRefreshClick();
                 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-all text-left cursor-pointer"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors duration-200 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-400"
               >
-                <RefreshCw size={13} className="text-purple-400" />
+                <RefreshCw size={13} className="text-purple-400" aria-hidden="true" />
                 <span>Sync Node Telemetry</span>
               </button>
             </div>

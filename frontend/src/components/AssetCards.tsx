@@ -29,6 +29,7 @@ export default function AssetCards({
 }: AssetCardsProps) {
   return (
     <motion.section
+      aria-label="Blockchain Telemetry Metrics"
       variants={staggerContainer}
       initial="hidden"
       animate="show"
@@ -37,23 +38,23 @@ export default function AssetCards({
       {/* 1. Total Volume ETH Card */}
       <motion.div
         variants={cardVariant}
-        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-cyan-500/40 hover:glow-border-cyan transition-all duration-300 relative overflow-hidden"
+        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-cyan-500/40 hover:glow-border-cyan transition-[border-color,box-shadow] duration-200 relative overflow-hidden"
       >
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
             <span className="text-[10px] font-mono uppercase tracking-widest text-white/50">
               Live Volume
             </span>
-            <span className="text-xl font-bold font-mono text-white mt-1">
+            <span className="text-xl font-bold font-mono text-white mt-1 tabular-nums">
               {totalVolumeEth.toFixed(2)} <span className="text-xs text-cyber-cyan font-normal">ETH</span>
             </span>
           </div>
-          <div className="w-8 h-8 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyber-cyan">
+          <div className="w-8 h-8 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyber-cyan" aria-hidden="true">
             <Zap className="w-4 h-4" />
           </div>
         </div>
         <div className="flex items-center gap-1 mt-3 text-[11px] font-mono text-emerald-400">
-          <ArrowUpRight className="w-3.5 h-3.5" />
+          <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
           <span>Real-time Inflow</span>
         </div>
       </motion.div>
@@ -61,7 +62,7 @@ export default function AssetCards({
       {/* 2. Threat Detections Card */}
       <motion.div
         variants={cardVariant}
-        className={`p-4 rounded-3xl liquid-glass border flex flex-col justify-between group transition-all duration-300 relative overflow-hidden ${
+        className={`p-4 rounded-3xl liquid-glass border flex flex-col justify-between group transition-[border-color,box-shadow] duration-200 relative overflow-hidden ${
           highRiskCount > 0
             ? 'border-rose-500/40 glow-border-rose'
             : 'border-white/10 hover:border-white/20'
@@ -72,7 +73,7 @@ export default function AssetCards({
             <span className="text-[10px] font-mono uppercase tracking-widest text-white/50">
               Threat Flags
             </span>
-            <span className={`text-xl font-bold font-mono mt-1 ${highRiskCount > 0 ? 'text-cyber-rose' : 'text-white'}`}>
+            <span className={`text-xl font-bold font-mono mt-1 tabular-nums ${highRiskCount > 0 ? 'text-cyber-rose' : 'text-white'}`}>
               {highRiskCount} <span className="text-xs font-normal">Flagged</span>
             </span>
           </div>
@@ -80,7 +81,7 @@ export default function AssetCards({
             highRiskCount > 0
               ? 'bg-rose-500/20 border border-rose-500/30 text-cyber-rose animate-pulse'
               : 'bg-white/5 text-white/40'
-          }`}>
+          }`} aria-hidden="true">
             <ShieldAlert className="w-4 h-4" />
           </div>
         </div>
@@ -92,18 +93,18 @@ export default function AssetCards({
       {/* 3. Block Height Card */}
       <motion.div
         variants={cardVariant}
-        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-indigo-500/40 transition-all duration-300 relative overflow-hidden"
+        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-indigo-500/40 transition-[border-color] duration-200 relative overflow-hidden"
       >
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
             <span className="text-[10px] font-mono uppercase tracking-widest text-white/50">
               Block Height
             </span>
-            <span className="text-lg font-bold font-mono text-white mt-1 truncate">
+            <span className="text-lg font-bold font-mono text-white mt-1 truncate tabular-nums">
               #{blockNumber || '19420550'}
             </span>
           </div>
-          <div className="w-8 h-8 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+          <div className="w-8 h-8 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400" aria-hidden="true">
             <Layers className="w-4 h-4" />
           </div>
         </div>
@@ -115,23 +116,23 @@ export default function AssetCards({
       {/* 4. Transactions Scanned Card */}
       <motion.div
         variants={cardVariant}
-        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-emerald-500/40 transition-all duration-300 relative overflow-hidden"
+        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-emerald-500/40 transition-[border-color] duration-200 relative overflow-hidden"
       >
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
             <span className="text-[10px] font-mono uppercase tracking-widest text-white/50">
               Tx Stream
             </span>
-            <span className="text-xl font-bold font-mono text-white mt-1">
+            <span className="text-xl font-bold font-mono text-white mt-1 tabular-nums">
               {totalScanned} <span className="text-xs text-emerald-400 font-normal">Units</span>
             </span>
           </div>
-          <div className="w-8 h-8 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <div className="w-8 h-8 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400" aria-hidden="true">
             <Activity className="w-4 h-4" />
           </div>
         </div>
         <div className="flex items-center gap-1 mt-3 text-[11px] font-mono text-emerald-400">
-          <ArrowUpRight className="w-3.5 h-3.5" />
+          <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
           <span>Continuous Poll</span>
         </div>
       </motion.div>
@@ -139,18 +140,18 @@ export default function AssetCards({
       {/* 5. Network Gas Price Card */}
       <motion.div
         variants={cardVariant}
-        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-orange-500/40 transition-all duration-300 relative overflow-hidden"
+        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-orange-500/40 transition-[border-color] duration-200 relative overflow-hidden"
       >
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
             <span className="text-[10px] font-mono uppercase tracking-widest text-white/50">
               Gas Velocity
             </span>
-            <span className="text-xl font-bold font-mono text-white mt-1">
+            <span className="text-xl font-bold font-mono text-white mt-1 tabular-nums">
               {avgGasPrice.toFixed(1)} <span className="text-xs text-orange-400 font-normal">Gwei</span>
             </span>
           </div>
-          <div className="w-8 h-8 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
+          <div className="w-8 h-8 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400" aria-hidden="true">
             <Flame className="w-4 h-4" />
           </div>
         </div>
@@ -162,7 +163,7 @@ export default function AssetCards({
       {/* 6. ML Anomaly Core */}
       <motion.div
         variants={cardVariant}
-        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-cyan-500/40 transition-all duration-300 relative overflow-hidden"
+        className="p-4 rounded-3xl liquid-glass border border-white/10 flex flex-col justify-between group hover:border-cyan-500/40 transition-[border-color] duration-200 relative overflow-hidden"
       >
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
@@ -173,7 +174,7 @@ export default function AssetCards({
               iForest (5%)
             </span>
           </div>
-          <div className="w-8 h-8 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyber-cyan">
+          <div className="w-8 h-8 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyber-cyan" aria-hidden="true">
             <Cpu className="w-4 h-4" />
           </div>
         </div>

@@ -78,24 +78,28 @@ export default function RecehTokSidebar({
 
   return (
     <aside
-      className={`h-full bg-[#131424] border-r border-white/5 flex flex-col justify-between py-6 z-30 select-none transition-all duration-300 ${
+      aria-label="Sidebar Navigation"
+      className={`h-full bg-[#131424] border-r border-white/5 flex flex-col justify-between py-6 z-30 select-none transition-[width,padding] duration-300 ${
         isCollapsed ? 'w-20 px-2 items-center' : 'w-64 px-4'
       }`}
     >
       {/* Top Brand Logo & Collapse Toggle */}
       <div className="flex flex-col gap-8 w-full">
         <div
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`flex items-center cursor-pointer group transition-all w-full ${
+          className={`flex items-center w-full ${
             isCollapsed ? 'justify-center' : 'justify-between px-2'
           }`}
-          title={isCollapsed ? "Click to Expand Sidebar" : "Click to Collapse Sidebar"}
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full border border-cyan-400/50 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden shadow-[0_0_16px_rgba(0,210,255,0.4)] bg-transparent">
+          <button
+            type="button"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            aria-label={isCollapsed ? "Expand sidebar navigation" : "Collapse sidebar navigation"}
+            className="flex items-center gap-3 min-w-0 group cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-xl p-1"
+          >
+            <div className="w-10 h-10 rounded-full border border-cyan-400/50 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200 overflow-hidden shadow-[0_0_16px_rgba(0,210,255,0.4)] bg-transparent">
               <img
                 src="/favicon.png"
-                alt="CryptoTrace AI"
+                alt="CryptoTrace AI logo"
                 className="w-full h-full object-contain rounded-full"
               />
             </div>
@@ -104,20 +108,19 @@ export default function RecehTokSidebar({
                 CryptoTrace <span className="gradient-text font-black">AI</span>
               </span>
             )}
-          </div>
+          </button>
 
           {!isCollapsed && (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsCollapsed(true);
-              }}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-all cursor-pointer"
-              title="Collapse Sidebar"
+              type="button"
+              onClick={() => setIsCollapsed(true)}
+              aria-label="Collapse sidebar"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               <img
                 src={collapseIcon}
-                alt="Toggle"
+                alt=""
+                aria-hidden="true"
                 className="w-3.5 h-3.5 object-contain"
               />
             </button>
@@ -125,15 +128,17 @@ export default function RecehTokSidebar({
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex flex-col gap-2 w-full">
+        <nav className="flex flex-col gap-2 w-full" aria-label="Main navigation items">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
+                type="button"
                 onClick={() => handleNavClick(item.id)}
-                title={item.label}
-                className={`relative flex items-center rounded-2xl transition-all duration-200 cursor-pointer ${
+                aria-label={`${item.label} — ${item.sublabel}`}
+                aria-current={isActive ? 'page' : undefined}
+                className={`relative flex items-center rounded-2xl transition-[color,background-color,border-color,box-shadow] duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#131424] ${
                   isCollapsed
                     ? 'w-12 h-12 mx-auto justify-center'
                     : 'w-full gap-3.5 px-3 py-3'
@@ -151,8 +156,9 @@ export default function RecehTokSidebar({
                 <div className="w-5 h-5 flex items-center justify-center shrink-0">
                   <img
                     src={item.icon}
-                    alt={item.label}
-                    className={`w-5 h-5 object-contain transition-all ${
+                    alt=""
+                    aria-hidden="true"
+                    className={`w-5 h-5 object-contain transition-[filter,opacity] duration-200 ${
                       isActive ? 'filter brightness-150 drop-shadow-[0_0_6px_rgba(0,210,255,0.8)]' : 'opacity-60 hover:opacity-100'
                     }`}
                   />
@@ -173,11 +179,11 @@ export default function RecehTokSidebar({
                 {item.hasDot && (
                   <span className={`${isCollapsed ? 'absolute top-2 right-2' : 'ml-auto flex items-center gap-1'}`}>
                     {!isCollapsed && item.badgeText && (
-                      <span className="px-1.5 py-0.2 rounded-full bg-[#ff2d87]/20 border border-[#ff2d87]/40 text-[#ff2d87] text-[9px] font-mono font-bold">
+                      <span className="px-1.5 py-0.2 rounded-full bg-[#ff2d87]/20 border border-[#ff2d87]/40 text-[#ff2d87] text-[9px] font-mono font-bold tabular-nums">
                         {item.badgeText}
                       </span>
                     )}
-                    <span className="w-2 h-2 rounded-full bg-[#ff2d87] shadow-[0_0_8px_#ff2d87] animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-[#ff2d87] shadow-[0_0_8px_#ff2d87] animate-pulse" aria-hidden="true" />
                   </span>
                 )}
               </button>
@@ -187,16 +193,17 @@ export default function RecehTokSidebar({
           {/* Database Explorer Item directly in Sidebar */}
           {onOpenDatabase && (
             <button
+              type="button"
               onClick={handleDbClick}
-              title="Neon SQL Database"
-              className={`relative flex items-center rounded-2xl text-purple-300/60 hover:text-purple-300 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/30 transition-all duration-200 cursor-pointer ${
+              aria-label="Open Neon SQL Database PostgreSQL Ledger"
+              className={`relative flex items-center rounded-2xl text-purple-300/60 hover:text-purple-300 hover:bg-purple-500/10 border border-transparent hover:border-purple-500/30 transition-[color,background-color,border-color] duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#131424] ${
                 isCollapsed
                   ? 'w-12 h-12 mx-auto justify-center'
                   : 'w-full gap-3.5 px-3 py-3'
               }`}
             >
               <div className="w-5 h-5 flex items-center justify-center shrink-0 text-purple-400">
-                <Database size={18} />
+                <Database size={18} aria-hidden="true" />
               </div>
 
               {!isCollapsed && (
@@ -221,26 +228,31 @@ export default function RecehTokSidebar({
           <div className="p-4 rounded-2xl bg-[#1e1f38] border border-white/5 flex flex-col items-center text-center relative group shadow-xl">
             <img
               src={giftIllustration}
-              alt="Gift box"
+              alt=""
+              aria-hidden="true"
               className="w-14 h-14 object-contain -mt-8 mb-2 filter drop-shadow-[0_8px_16px_rgba(245,166,35,0.3)] animate-float"
             />
             <span className="text-[11px] text-white/50 font-mono">
               Live scanned volume
             </span>
-            <span className="text-xs font-mono font-bold text-white mt-0.5">
+            <span className="text-xs font-mono font-bold text-white mt-0.5 tabular-nums">
               0.02343,00 <span className="text-cyber-cyan">ETH</span>
             </span>
 
             <div className="flex items-center gap-2 w-full mt-3">
               <button
+                type="button"
                 onClick={onOpenDatabase}
-                className="flex-1 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 text-[10px] font-mono font-bold transition-all cursor-pointer"
+                aria-label="Explore Neon Database"
+                className="flex-1 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 text-[10px] font-mono font-bold transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
                 Explore DB
               </button>
               <button
+                type="button"
                 onClick={() => setShowGiftWidget(false)}
-                className="px-2 py-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-white text-[10px] font-mono transition-all cursor-pointer"
+                aria-label="Dismiss scanned volume widget"
+                className="px-2 py-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-white text-[10px] font-mono transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
               >
                 Dismiss
               </button>
@@ -253,7 +265,7 @@ export default function RecehTokSidebar({
           isCollapsed ? 'p-3 justify-center w-12 h-12 mx-auto' : 'p-2.5 justify-between'
         }`}>
           <div className="flex items-center gap-2 min-w-0">
-            <div className={`w-2 h-2 rounded-full shrink-0 ${status ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} />
+            <div className={`w-2 h-2 rounded-full shrink-0 ${status ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} aria-hidden="true" />
             {!isCollapsed && (
               <span className={`text-[10px] font-mono truncate ${status ? 'text-white/70' : 'text-rose-400/80 font-bold'}`}>
                 {status ? 'Ethereum Mainnet' : 'Mainnet (Offline)'}

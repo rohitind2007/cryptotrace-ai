@@ -61,12 +61,15 @@ export default function Sidebar({
   ];
 
   return (
-    <aside className="w-20 md:w-64 h-full liquid-glass bg-[#070c20]/60 backdrop-blur-2xl border-r border-cyan-500/20 flex flex-col justify-between py-5 px-3 z-30 select-none transition-all duration-300 shadow-2xl">
+    <aside 
+      aria-label="CryptoTrace Navigation"
+      className="w-20 md:w-64 h-full liquid-glass bg-[#070c20]/80 backdrop-blur-2xl border-r border-cyan-500/20 flex flex-col justify-between py-5 px-3 z-30 select-none transition-[width,padding] duration-300 shadow-2xl"
+    >
       {/* Top Section: Brand */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3 px-2">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500/30 to-violet-600/40 border border-cyan-400/40 flex items-center justify-center glow-border-cyan shrink-0 shadow-lg shadow-cyan-500/20">
-            <Shield className="w-5 h-5 text-cyber-cyan" />
+            <Shield className="w-5 h-5 text-cyber-cyan" aria-hidden="true" />
           </div>
           <div className="hidden md:flex flex-col">
             <span className="font-heading font-black italic tracking-wider text-base text-white">
@@ -79,7 +82,7 @@ export default function Sidebar({
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex flex-col gap-1.5">
+        <nav className="flex flex-col gap-1.5" aria-label="Main Navigation">
           <span className="hidden md:block text-[10px] font-mono font-bold uppercase tracking-widest text-white/30 px-3 py-1">
             Menu
           </span>
@@ -89,9 +92,11 @@ export default function Sidebar({
             return (
               <button
                 key={item.id}
+                type="button"
                 onClick={() => onSelectTab(item.id)}
-                title={item.label}
-                className={`group relative flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-300 cursor-pointer ${
+                aria-label={`${item.label} — ${item.sublabel}`}
+                aria-current={isActive ? 'page' : undefined}
+                className={`group relative flex items-center gap-3 px-3 py-3 rounded-2xl transition-[color,background-color,border-color,box-shadow,transform] duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070c20] ${
                   isActive
                     ? 'bg-gradient-to-r from-cyan-500/15 to-transparent text-white border border-cyan-500/30 shadow-[0_0_20px_rgba(34,211,238,0.15)]'
                     : 'text-white/60 hover:text-white hover:bg-white/5 border border-transparent'
@@ -104,7 +109,7 @@ export default function Sidebar({
 
                 {/* CryptoBoard Iconly Icon */}
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shrink-0 ${
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shrink-0 ${
                     isActive
                       ? 'bg-cyan-500/20 text-cyber-cyan shadow-inner'
                       : 'bg-white/[0.04] text-white/70 group-hover:bg-white/10'
@@ -112,8 +117,9 @@ export default function Sidebar({
                 >
                   <img
                     src={item.icon}
-                    alt={item.label}
-                    className={`w-5 h-5 object-contain transition-all duration-300 ${
+                    alt=""
+                    aria-hidden="true"
+                    className={`w-5 h-5 object-contain transition-[opacity,filter] duration-200 ${
                       isActive ? 'brightness-125 filter drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]' : 'opacity-70 group-hover:opacity-100'
                     }`}
                   />
@@ -130,7 +136,7 @@ export default function Sidebar({
 
                 {item.badge && (
                   <span
-                    className={`hidden md:inline-flex text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                    className={`hidden md:inline-flex text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider tabular-nums ${
                       item.badgeColor || 'bg-white/10 text-white/80'
                     }`}
                   >
@@ -147,12 +153,13 @@ export default function Sidebar({
       <div className="flex flex-col gap-3 pt-4 border-t border-white/10">
         {onOpenDatabase && (
           <button
+            type="button"
             onClick={onOpenDatabase}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 transition-all duration-300 text-xs font-mono group cursor-pointer hover:shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-            title="Open Neon PostgreSQL Table Explorer"
+            aria-label="Open Neon SQL Database Engine"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyber-cyan border border-cyan-500/30 transition-[color,background-color,border-color,box-shadow] duration-200 text-xs font-mono group cursor-pointer hover:shadow-[0_0_15px_rgba(34,211,238,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070c20]"
           >
             <div className="w-8 h-8 rounded-xl bg-cyan-500/20 flex items-center justify-center shrink-0">
-              <Database className="w-4 h-4 text-cyber-cyan group-hover:scale-110 transition-transform" />
+              <Database className="w-4 h-4 text-cyber-cyan group-hover:scale-105 transition-transform duration-200" aria-hidden="true" />
             </div>
             <div className="hidden md:flex flex-col text-left">
               <span className="text-xs font-bold text-white group-hover:text-cyber-cyan">Neon SQL</span>
@@ -164,7 +171,7 @@ export default function Sidebar({
         {/* Node Status Card */}
         <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${status ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} />
+            <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${status ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]' : 'bg-rose-500 shadow-[0_0_8px_#f43f5e]'}`} aria-hidden="true" />
             <div className="hidden md:flex flex-col min-w-0">
               <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Network</span>
               <span className="text-xs font-bold font-mono text-white/90 truncate">Ethereum Mainnet</span>

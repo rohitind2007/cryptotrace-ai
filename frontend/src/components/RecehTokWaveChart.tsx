@@ -119,53 +119,65 @@ export default function RecehTokWaveChart({
   const isRightSide = percentX > 45;
 
   return (
-    <div className="w-full bg-[#1b1c33]/90 backdrop-blur-xl rounded-[2rem] border border-white/5 p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden group select-none transition-all duration-300">
+    <section 
+      aria-label="Real-time Anomaly Multi-Curve Wave Chart"
+      className="w-full bg-[#1b1c33]/90 backdrop-blur-xl rounded-[2rem] border border-white/5 p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden group select-none transition-[border-color,box-shadow] duration-200"
+    >
       {/* Top Header & Legend */}
       <div className="flex flex-wrap justify-between items-center gap-3 z-10 mb-4">
         {/* Curve Legend Filters */}
-        <div className="flex items-center gap-2.5 text-xs font-medium">
+        <div className="flex items-center gap-2.5 text-xs font-medium" role="group" aria-label="Wave chart metric filter toggles">
           <button
+            type="button"
             onClick={() => {
               setActiveToken('BTC');
               if (onSelectToken) onSelectToken('BTC');
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full cursor-pointer transition-all ${
+            aria-label="Filter Threat Risk Wave (BTC)"
+            aria-pressed={activeToken === 'BTC'}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full cursor-pointer transition-[color,background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${
               activeToken === 'BTC'
                 ? 'bg-[#ff2d87]/20 border border-[#ff2d87]/60 text-white font-bold shadow-[0_0_12px_rgba(255,45,135,0.4)]'
                 : 'text-white/40 hover:text-white/80 border border-transparent'
             }`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-[#ff2d87] shadow-[0_0_8px_#ff2d87]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ff2d87] shadow-[0_0_8px_#ff2d87]" aria-hidden="true" />
             <span>Threat Risk</span>
           </button>
 
           <button
+            type="button"
             onClick={() => {
               setActiveToken('ETH');
               if (onSelectToken) onSelectToken('ETH');
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full cursor-pointer transition-all ${
+            aria-label="Filter ETH Inflow Volume Wave"
+            aria-pressed={activeToken === 'ETH'}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full cursor-pointer transition-[color,background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               activeToken === 'ETH'
                 ? 'bg-[#00d2ff]/20 border border-[#00d2ff]/60 text-white font-bold shadow-[0_0_12px_rgba(0,210,255,0.4)]'
                 : 'text-white/40 hover:text-white/80 border border-transparent'
             }`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-[#00d2ff] shadow-[0_0_8px_#00d2ff]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#00d2ff] shadow-[0_0_8px_#00d2ff]" aria-hidden="true" />
             <span>ETH Inflow ($3,492)</span>
           </button>
 
           <button
+            type="button"
             onClick={() => {
               setActiveToken('LTC');
               if (onSelectToken) onSelectToken('LTC');
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full cursor-pointer transition-all ${
+            aria-label="Filter Gas Velocity Wave"
+            aria-pressed={activeToken === 'LTC'}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full cursor-pointer transition-[color,background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
               activeToken === 'LTC'
                 ? 'bg-[#f5a623]/20 border border-[#f5a623]/60 text-white font-bold shadow-[0_0_12px_rgba(245,166,35,0.4)]'
                 : 'text-white/40 hover:text-white/80 border border-transparent'
             }`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-[#f5a623] shadow-[0_0_8px_#f5a623]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#f5a623] shadow-[0_0_8px_#f5a623]" aria-hidden="true" />
             <span>Gas Velocity</span>
           </button>
         </div>
@@ -173,23 +185,25 @@ export default function RecehTokWaveChart({
         {/* Selected Transaction Chip */}
         {activeInspection && (
           <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#131424] border border-cyan-500/30 text-cyber-cyan text-xs font-mono animate-in fade-in duration-300">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" aria-hidden="true" />
             <span className="text-white/60">Inspecting:</span>
-            <strong className="text-white">
-              {activeInspection.tx_hash ? `${activeInspection.tx_hash.slice(0, 8)}...` : '0x0'}
+            <strong className="text-white tabular-nums">
+              {activeInspection.tx_hash ? `${activeInspection.tx_hash.slice(0, 8)}…` : '0x0'}
             </strong>
-            <span className="text-cyan-300 font-bold">({displayEthVal} ETH)</span>
+            <span className="text-cyan-300 font-bold tabular-nums">({displayEthVal} ETH)</span>
           </div>
         )}
 
         {/* Action Toggle to Full Topology Flow Canvas */}
         <button
+          type="button"
           onClick={onOpenCanvas}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/15 hover:bg-cyan-500/25 text-cyber-cyan border border-cyan-400/40 text-xs font-mono font-bold transition-all duration-300 cursor-pointer hover:scale-[1.03] shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+          aria-label="Open Interactive Topology Graph"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/15 hover:bg-cyan-500/25 text-cyber-cyan border border-cyan-400/40 text-xs font-mono font-bold transition-[transform,background-color] duration-200 cursor-pointer hover:scale-[1.03] shadow-[0_0_15px_rgba(34,211,238,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
         >
-          <GitFork size={14} />
+          <GitFork size={14} aria-hidden="true" />
           <span>Interactive Topology Graph</span>
-          <ArrowUpRight size={14} />
+          <ArrowUpRight size={14} aria-hidden="true" />
         </button>
       </div>
 
@@ -348,6 +362,6 @@ export default function RecehTokWaveChart({
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

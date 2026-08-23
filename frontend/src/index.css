@@ -10,11 +10,40 @@
     font-family: "Inter", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color-scheme: dark;
+  }
+
+  /* Ensure numbers and monospace tables maintain uniform width */
+  font-mono,
+  .font-mono,
+  code,
+  kbd,
+  samp {
+    font-family: "JetBrains Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Global focus-visible styling complying with Web Interface Guidelines */
+  :focus-visible {
+    outline: 2px solid #22d3ee;
+    outline-offset: 2px;
   }
 }
 
 /* ─── Component Utilities ─── */
 @layer components {
+  /* High-legibility accessible focus ring */
+  .focus-ring-cyan {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#131424];
+  }
+
+  .focus-ring-rose {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#131424];
+  }
+
+  .modal-dialog-contain {
+    overscroll-behavior: contain;
+  }
   /*
    * PERF: Reduced backdrop-blur from 16px → 8px.
    * backdrop-filter is the #1 FPS killer when stacked on many elements.

@@ -21,6 +21,17 @@ export default function RiskMatrixModal({
   const [sortBy, setSortBy] = useState<'buffer' | 'highest' | 'lowest'>('buffer');
   const [hoveredTx, setHoveredTx] = useState<TransactionPayload | null>(null);
 
+  // Close on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const sortedTxs = [...transactions].sort((a, b) => {
@@ -40,13 +51,19 @@ export default function RiskMatrixModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div 
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 modal-dialog-contain"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="matrix-modal-title"
+      >
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
+          aria-hidden="true"
           className="absolute inset-0 bg-[#0d0e1a]/85 backdrop-blur-md"
         />
 
@@ -65,12 +82,12 @@ export default function RiskMatrixModal({
           <div className="p-6 border-b border-white/5 flex flex-wrap justify-between items-center gap-4 bg-[#171829]">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyber-cyan">
-                <Grid size={20} />
+                <Grid size={20} aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-lg font-bold font-heading text-white flex items-center gap-2">
+                <h2 id="matrix-modal-title" className="text-lg font-bold font-heading text-white flex items-center gap-2">
                   <span>Buffer Risk Heatmap Matrix</span>
-                  <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                  <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 tabular-nums">
                     {transactions.length} Buffered Units
                   </span>
                 </h2>
@@ -82,26 +99,32 @@ export default function RiskMatrixModal({
 
             {/* Sorting & Close */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center bg-[#131424] p-1 rounded-xl border border-white/10 text-xs font-mono">
+              <div className="flex items-center bg-[#131424] p-1 rounded-xl border border-white/10 text-xs font-mono" role="group" aria-label="Heatmap sorting options">
                 <button
+                  type="button"
                   onClick={() => setSortBy('buffer')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  aria-pressed={sortBy === 'buffer'}
+                  className={`px-2.5 py-1 rounded-lg transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 ${
                     sortBy === 'buffer' ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-white/40 hover:text-white'
                   }`}
                 >
                   Live Order
                 </button>
                 <button
+                  type="button"
                   onClick={() => setSortBy('highest')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  aria-pressed={sortBy === 'highest'}
+                  className={`px-2.5 py-1 rounded-lg transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-pink-400 ${
                     sortBy === 'highest' ? 'bg-[#ff2d87]/20 text-[#ff2d87] font-bold' : 'text-white/40 hover:text-white'
                   }`}
                 >
                   High Risk First
                 </button>
                 <button
+                  type="button"
                   onClick={() => setSortBy('lowest')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  aria-pressed={sortBy === 'lowest'}
+                  className={`px-2.5 py-1 rounded-lg transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 ${
                     sortBy === 'lowest' ? 'bg-emerald-500/20 text-emerald-400 font-bold' : 'text-white/40 hover:text-white'
                   }`}
                 >
@@ -110,10 +133,12 @@ export default function RiskMatrixModal({
               </div>
 
               <button
+                type="button"
                 onClick={onClose}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all cursor-pointer"
+                aria-label="Close buffer risk heatmap modal"
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -122,19 +147,19 @@ export default function RiskMatrixModal({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-[#131424] border-b border-white/5 text-xs font-mono">
             <div className="p-3 rounded-2xl bg-[#1b1c33] border border-white/5 flex items-center justify-between">
               <span className="text-white/40 text-[10px] uppercase">Avg Risk</span>
-              <span className="text-base font-bold text-cyan-300">{avgRisk}%</span>
+              <span className="text-base font-bold text-cyan-300 tabular-nums">{avgRisk}%</span>
             </div>
             <div className="p-3 rounded-2xl bg-[#1b1c33] border border-[#ff2d87]/30 flex items-center justify-between">
               <span className="text-[#ff2d87] text-[10px] uppercase">Critical (≥70%)</span>
-              <span className="text-base font-bold text-[#ff2d87]">{criticalCount}</span>
+              <span className="text-base font-bold text-[#ff2d87] tabular-nums">{criticalCount}</span>
             </div>
             <div className="p-3 rounded-2xl bg-[#1b1c33] border border-amber-500/30 flex items-center justify-between">
               <span className="text-amber-400 text-[10px] uppercase">Medium (40-69%)</span>
-              <span className="text-base font-bold text-amber-400">{mediumCount}</span>
+              <span className="text-base font-bold text-amber-400 tabular-nums">{mediumCount}</span>
             </div>
             <div className="p-3 rounded-2xl bg-[#1b1c33] border border-emerald-500/30 flex items-center justify-between">
               <span className="text-emerald-400 text-[10px] uppercase">Low (&lt;40%)</span>
-              <span className="text-base font-bold text-emerald-400">{lowCount}</span>
+              <span className="text-base font-bold text-emerald-400 tabular-nums">{lowCount}</span>
             </div>
           </div>
 
@@ -156,18 +181,20 @@ export default function RiskMatrixModal({
                 return (
                   <button
                     key={tx.tx_hash || idx}
+                    type="button"
                     onMouseEnter={() => setHoveredTx(tx)}
+                    onFocus={() => setHoveredTx(tx)}
                     onClick={() => {
                       onSelectTx(tx);
                       onClose();
                     }}
-                    className={`h-14 rounded-2xl border flex flex-col items-center justify-center p-1 transition-all duration-200 cursor-pointer group hover:scale-105 ${cellBg}`}
-                    title={`Tx: ${tx.tx_hash.slice(0, 10)}... | Value: ${tx.value_eth} ETH | Risk: ${risk}%`}
+                    aria-label={`Transaction ${tx.tx_hash.slice(0, 8)}. Risk: ${risk}%. Value: ${tx.value_eth} ETH`}
+                    className={`h-14 rounded-2xl border flex flex-col items-center justify-center p-1 transition-[transform,background-color] duration-150 cursor-pointer group hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${cellBg}`}
                   >
-                    <span className="text-xs font-black font-mono tracking-tight">
+                    <span className="text-xs font-black font-mono tracking-tight tabular-nums">
                       {risk}%
                     </span>
-                    <span className="text-[8px] font-mono text-white/50 truncate max-w-[48px]">
+                    <span className="text-[8px] font-mono text-white/50 truncate max-w-[48px] tabular-nums">
                       {Number(tx.value_eth || 0).toFixed(2)}E
                     </span>
                   </button>
@@ -180,14 +207,14 @@ export default function RiskMatrixModal({
           <div className="p-4 border-t border-white/5 bg-[#171829] flex flex-wrap justify-between items-center gap-3 text-xs font-mono">
             {hoveredTx ? (
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" aria-hidden="true" />
                 <span className="text-white/60">
-                  Target: <strong className="text-white">{hoveredTx.from.slice(0, 8)}...{hoveredTx.from.slice(-6)}</strong>
+                  Target: <strong className="text-white tabular-nums">{hoveredTx.from.slice(0, 8)}…{hoveredTx.from.slice(-6)}</strong>
                 </span>
-                <span className="text-cyan-300">
+                <span className="text-cyan-300 tabular-nums">
                   {Number(hoveredTx.value_eth || 0).toFixed(4)} ETH
                 </span>
-                <span className="text-white/40">
+                <span className="text-white/40 tabular-nums">
                   Block #{hoveredTx.block_number}
                 </span>
               </div>
@@ -199,14 +226,15 @@ export default function RiskMatrixModal({
 
             {hoveredTx && (
               <button
+                type="button"
                 onClick={() => {
                   onOpenReport(hoveredTx);
                   onClose();
                 }}
-                className="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/30 text-cyber-cyan font-bold text-xs transition-all cursor-pointer flex items-center gap-1"
+                className="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/30 text-cyber-cyan font-bold text-xs transition-colors duration-150 cursor-pointer flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
                 <span>Inspect Dossier</span>
-                <ArrowRight size={12} />
+                <ArrowRight size={12} aria-hidden="true" />
               </button>
             )}
           </div>

@@ -49,6 +49,7 @@ export interface FlowNodeData {
   ethAmount?: string;
   isTarget?: boolean;
   onSelect?: (address: string) => void;
+  [key: string]: unknown;
 }
 
 /* ─── Known Ethereum Entities & ENS Registry ─── */
@@ -519,7 +520,6 @@ function generateSpaciousTreeTopology(targetAddr: string): { nodes: Node[]; edge
 
     // Sub-nodes
     const subNodes = b.subNodes || [];
-    const numSub = subNodes.length;
     const subGap = 210;
     const hop2Y = 530;
 
@@ -817,51 +817,57 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
         )}
 
         {/* Interactive Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" role="toolbar" aria-label="Graph canvas controls">
           {/* Layout Mode Toggle Button */}
           <button
+            type="button"
             onClick={handleToggleLayout}
-            className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer"
-            title="Toggle between Tree Flow & Radial Orbit layout"
+            aria-label={`Toggle layout mode (Currently ${layoutMode === "tree" ? "Tree Flow" : "Radial Orbit"})`}
+            className="px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-mono flex items-center gap-1.5 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            {layoutMode === "tree" ? <Orbit size={13} /> : <Network size={13} />}
+            {layoutMode === "tree" ? <Orbit size={13} aria-hidden="true" /> : <Network size={13} aria-hidden="true" />}
             <span>{layoutMode === "tree" ? "Radial Orbit" : "Tree Flow"}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => fetchGraph(activeTarget, layoutMode)}
-            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-all cursor-pointer"
-            title="Re-Align & Refresh Layout"
+            aria-label="Re-align and refresh graph layout"
+            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin text-cyan-400" : ""} />
+            <RefreshCw size={14} className={loading ? "animate-spin text-cyan-400" : ""} aria-hidden="true" />
           </button>
           <button
+            type="button"
             onClick={() => zoomIn({ duration: 300 })}
-            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-all cursor-pointer"
-            title="Zoom In"
+            aria-label="Zoom in graph"
+            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            <ZoomIn size={14} />
+            <ZoomIn size={14} aria-hidden="true" />
           </button>
           <button
+            type="button"
             onClick={() => zoomOut({ duration: 300 })}
-            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-all cursor-pointer"
-            title="Zoom Out"
+            aria-label="Zoom out graph"
+            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            <ZoomOut size={14} />
+            <ZoomOut size={14} aria-hidden="true" />
           </button>
           <button
+            type="button"
             onClick={handleResetView}
-            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-all cursor-pointer"
-            title="Reset & Fit View"
+            aria-label="Reset zoom and fit view"
+            className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            <RotateCcw size={14} />
+            <RotateCcw size={14} aria-hidden="true" />
           </button>
           <button
+            type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 transition-all cursor-pointer"
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Canvas"}
+            aria-label={isFullscreen ? "Exit Fullscreen view" : "Enter Fullscreen Canvas"}
+            className="p-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            {isFullscreen ? <Minimize2 size={14} aria-hidden="true" /> : <Maximize2 size={14} aria-hidden="true" />}
           </button>
         </div>
       </div>

@@ -185,8 +185,16 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen bg-[#131424] text-slate-100 flex font-sans overflow-hidden selection:bg-cyan-500/30 relative">
+      {/* Skip to Main Content Link for Keyboard / Screen Reader Accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-cyan-500 focus:text-black focus:font-bold focus:rounded-xl focus:shadow-2xl focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       {/* ─── Ambient Glow Mesh ─── */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
         <div className="ambient-orb ambient-orb-violet w-[700px] h-[700px] -top-60 -left-60 opacity-30" />
         <div className="ambient-orb ambient-orb-cyan w-[600px] h-[600px] top-1/3 -right-40 opacity-20" />
       </div>
@@ -217,7 +225,7 @@ export default function App() {
         </div>
 
         {/* Scrollable Dashboard Body */}
-        <main className="flex-1 overflow-y-auto px-6 lg:px-8 pb-8 flex flex-col gap-6 custom-scrollbar">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto px-6 lg:px-8 pb-8 flex flex-col gap-6 custom-scrollbar focus:outline-none">
           {/* ─── Tab View 1: RecehTok Main Dashboard ─── */}
           {activeTab === 'terminal' && (
             <div className="flex flex-col gap-6">
@@ -235,10 +243,11 @@ export default function App() {
                     href="https://cybercrime.gov.in/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-300 hover:text-blue-100 hover:bg-blue-500/30 hover:border-blue-500/60 text-xs font-mono font-bold transition-all cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                    aria-label="Visit the official Indian Government Cyber Crime portal (opens in new tab)"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-300 hover:text-blue-100 hover:bg-blue-500/30 hover:border-blue-500/60 text-xs font-mono font-bold transition-colors duration-150 cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                   >
-                    <ArrowRight size={14} />
-                    Visit Cybercrime.gov.in
+                    <ArrowRight size={14} aria-hidden="true" />
+                    <span>Visit Cybercrime.gov.in</span>
                   </a>
                 </div>
               </div>
