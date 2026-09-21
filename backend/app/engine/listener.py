@@ -57,17 +57,22 @@ async def start_live_eth_stream(broadcast_callback):
                             "nonce": tx.get("nonce", 0)
                         }
 
-                        # Update Graph Service
-                        graph_service.add_transaction(
-                            tx_record["from"],
-                            tx_record["to"] or "",
-                            val_eth,
-                            tx_record["tx_hash"]
-                        )
-
                         # Run Fraud & ML Anomaly Detection
                         analysis = await FullFledgedFraudEngine.analyze_transaction(tx_record)
                         payload = {**tx_record, **analysis}
+
+                        # Update Graph Service with enriched ML analytics
+                        graph_service.add_transaction(
+                            from_addr=tx_record["from"],
+                            to_addr=tx_record["to"] or "",
+                            value_eth=val_eth,
+                            tx_hash=tx_record["tx_hash"],
+                            block_number=b_num,
+                            risk_score=payload.get("risk_score"),
+                            severity=payload.get("severity"),
+                            threat_category=payload.get("ai_forensic_dossier", {}).get("threat_category"),
+                            is_suspicious=payload.get("is_suspicious", False),
+                        )
 
                         # Broadcast to UI
                         await broadcast_callback(payload)

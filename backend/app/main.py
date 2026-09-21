@@ -8,6 +8,7 @@ from urllib.parse import urlparse, urlunparse
 from typing import List, Optional
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from app.services.graph_service import graph_service
 
 # Safe import for SQLAlchemy
 try:
@@ -231,6 +232,18 @@ def get_live_feed():
         txs = fetch_live_ethereum_transactions(limit=6)
         if txs:
             save_transactions_to_db(txs)
+            for tx in txs:
+                graph_service.add_transaction(
+                    from_addr=tx.get("from", ""),
+                    to_addr=tx.get("to", ""),
+                    value_eth=tx.get("value_eth", 0.0),
+                    tx_hash=tx.get("tx_hash", ""),
+                    block_number=tx.get("block_number"),
+                    risk_score=tx.get("risk_score"),
+                    severity=tx.get("severity"),
+                    threat_category=tx.get("ai_forensic_dossier", {}).get("threat_category"),
+                    is_suspicious=tx.get("is_suspicious", False)
+                )
             return txs
     except Exception as err:
         pass
@@ -267,6 +280,18 @@ def get_live_feed():
             }
         })
     save_transactions_to_db(dynamic_feed)
+    for tx in dynamic_feed:
+        graph_service.add_transaction(
+            from_addr=tx.get("from", ""),
+            to_addr=tx.get("to", ""),
+            value_eth=tx.get("value_eth", 0.0),
+            tx_hash=tx.get("tx_hash", ""),
+            block_number=tx.get("block_number"),
+            risk_score=tx.get("risk_score"),
+            severity=tx.get("severity"),
+            threat_category=tx.get("ai_forensic_dossier", {}).get("threat_category"),
+            is_suspicious=tx.get("is_suspicious", False)
+        )
     return dynamic_feed
 
 
@@ -306,6 +331,37 @@ def get_historical_transactions(limit: int = Query(default=50, ge=1, le=100)):
 @app.get("/api/graph/{address}")
 def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1, le=4)):
     target = address.lower()
+
+    # 1. Check persistent database if address is not in graph_service memory yet
+    if not graph_service.has_address(target) and SessionLocal:
+        db = SessionLocal()
+        try:
+            db_records = db.query(FlaggedTransaction).filter(
+                (FlaggedTransaction.from_address == target) | (FlaggedTransaction.to_address == target)
+            ).limit(50).all()
+            for r in db_records:
+                graph_service.add_transaction(
+                    from_addr=r.from_address,
+                    to_addr=r.to_address,
+                    value_eth=r.value_eth or 0.0,
+                    tx_hash=r.tx_hash or "",
+                    block_number=r.block_number,
+                    risk_score=r.risk_score,
+                    severity=r.severity,
+                    threat_category=r.threat_category,
+                    is_suspicious=r.is_suspicious
+                )
+        except Exception as e:
+            print(f"Graph DB query notice: {e}")
+        finally:
+            db.close()
+
+    # 2. Check if real subgraph exists for this address
+    real_subgraph = graph_service.get_subgraph_for_address(target, max_hops=hops)
+    if real_subgraph and len(real_subgraph.get("nodes", [])) > 1:
+        return real_subgraph
+
+    # 3. Fallback: Generate structured topology and register it in graph_service
     seed_int = int(hashlib.sha256(target.encode()).hexdigest()[:8], 16)
     rng = random.Random(seed_int)
 
@@ -315,59 +371,140 @@ def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1,
     nodes = [
         {
             "id": target,
-            "data": {"label": f"TARGET: {target[:6]}...{target[-4:]}"},
-            "position": {"x": 350, "y": 20}
+            "type": "flowNode",
+            "position": {"x": 580, "y": 40},
+            "draggable": True,
+            "data": {
+                "label": f"Target ({target[:6]}...{target[-4:]})",
+                "address": target,
+                "category": "target",
+                "riskScore": 65,
+                "isTarget": True
+            }
         }
     ]
     edges = []
 
-    column_width = 300
-    start_x = 350 - ((branch_count - 1) * column_width) / 2
+    column_width = 420
+    start_x = int(580 - ((branch_count - 1) * column_width) / 2)
+
+    cat_map = {
+        "DEX": "dex",
+        "MIXER": "mixer",
+        "CEX": "cex",
+        "LENDING": "lending",
+        "STAKING": "storage",
+        "STABLECOIN": "wallet",
+        "DEFI": "dex",
+        "ROUTER": "dex",
+        "MM": "wallet",
+        "EXCHANGE": "cex"
+    }
 
     for idx, proto in enumerate(sampled_protocols):
         hop1_id = f"0x{hex(rng.getrandbits(160))[2:].zfill(40)}"
         hop1_x = int(start_x + (idx * column_width))
-        hop1_y = 160
+        hop1_y = 270
+
+        p_type = proto.get("type", "wallet")
+        cat = cat_map.get(p_type, "wallet")
+        proto_risk = 94 if cat == "mixer" else (25 if cat == "cex" else 15)
+        amt_1 = round(rng.uniform(1.2, 55.0), 2)
 
         nodes.append({
             "id": hop1_id,
-            "data": {"label": proto["label"]},
-            "position": {"x": hop1_x, "y": hop1_y}
+            "type": "flowNode",
+            "position": {"x": hop1_x, "y": hop1_y},
+            "draggable": True,
+            "data": {
+                "label": proto["label"],
+                "address": hop1_id,
+                "category": cat,
+                "riskScore": proto_risk,
+                "ethAmount": f"{amt_1} ETH"
+            }
         })
 
-        amt_1 = round(rng.uniform(1.2, 55.0), 2)
+        tx_hash_1 = f"0x{hex(rng.getrandbits(256))[2:].zfill(64)}"
         edges.append({
             "id": f"e_root_{idx}",
             "source": target,
             "target": hop1_id,
-            "label": f"{amt_1} ETH"
+            "label": f"{amt_1} ETH",
+            "type": "smoothstep",
+            "animated": True,
+            "data": {
+                "tx_hash": tx_hash_1,
+                "risk_score": proto_risk,
+                "is_suspicious": cat == "mixer"
+            }
         })
+
+        # Save to graph_service for persistence
+        graph_service.add_transaction(
+            from_addr=target,
+            to_addr=hop1_id,
+            value_eth=amt_1,
+            tx_hash=tx_hash_1,
+            risk_score=proto_risk,
+            threat_category=proto["label"],
+            is_suspicious=(cat == "mixer")
+        )
 
         sub_hops = rng.randint(1, 2)
         for s_idx in range(sub_hops):
             hop2_id = f"0x{hex(rng.getrandbits(160))[2:].zfill(40)}"
-            hop2_x = hop1_x + (s_idx * 160) - (80 if sub_hops > 1 else 0)
-            hop2_y = 310
+            hop2_x = hop1_x + (s_idx * 210) - (105 if sub_hops > 1 else 0)
+            hop2_y = 520
 
             sub_label = rng.choice([
                 "Settled Inflow",
                 "Relay Wallet",
                 "Split Liquidity",
-                "Cold Storage",
+                "Cold Storage Safe",
                 "Bridge Contract"
             ])
+            sub_cat = "storage" if "Storage" in sub_label else "wallet"
+            sub_risk = 85 if cat == "mixer" else 12
+            amt_2 = round(amt_1 * rng.uniform(0.35, 0.9), 2)
+            tx_hash_2 = f"0x{hex(rng.getrandbits(256))[2:].zfill(64)}"
+
             nodes.append({
                 "id": hop2_id,
-                "data": {"label": f"{sub_label} ({hop2_id[:4]}..{hop2_id[-4:]})"},
-                "position": {"x": hop2_x, "y": hop2_y}
+                "type": "flowNode",
+                "position": {"x": hop2_x, "y": hop2_y},
+                "draggable": True,
+                "data": {
+                    "label": f"{sub_label} ({hop2_id[:4]}..{hop2_id[-4:]})",
+                    "address": hop2_id,
+                    "category": sub_cat,
+                    "riskScore": sub_risk,
+                    "ethAmount": f"{amt_2} ETH"
+                }
             })
 
-            amt_2 = round(amt_1 * rng.uniform(0.35, 0.9), 2)
             edges.append({
                 "id": f"e_sub_{idx}_{s_idx}",
                 "source": hop1_id,
                 "target": hop2_id,
-                "label": f"{amt_2} ETH"
+                "label": f"{amt_2} ETH",
+                "type": "smoothstep",
+                "animated": True,
+                "data": {
+                    "tx_hash": tx_hash_2,
+                    "risk_score": sub_risk,
+                    "is_suspicious": False
+                }
             })
 
-    return {"nodes": nodes, "edges": edges}
+            graph_service.add_transaction(
+                from_addr=hop1_id,
+                to_addr=hop2_id,
+                value_eth=amt_2,
+                tx_hash=tx_hash_2,
+                risk_score=sub_risk,
+                threat_category=sub_label,
+                is_suspicious=False
+            )
+
+    return {"nodes": nodes, "edges": edges}

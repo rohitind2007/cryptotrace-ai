@@ -34,7 +34,17 @@ import {
   Network,
   Orbit,
   Move,
+  Download,
+  Camera,
+  FileJson,
+  Bookmark,
+  BookmarkCheck,
+  Trash2,
+  ChevronDown,
+  FolderOpen,
+  X,
 } from "lucide-react";
+import { toPng } from "html-to-image";
 
 interface Props {
   selectedAddress: string | null;
@@ -624,6 +634,28 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
   const [activeTarget, setActiveTarget] = useState<string>(
     selectedAddress || "0xeb9863e28d0fc0702a5197e66674f86ee2c35b5e"
   );
+  const [showSaveDropdown, setShowSaveDropdown] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [showBookmarksModal, setShowBookmarksModal] = useState(false);
+  const [saveFeedback, setSaveFeedback] = useState<string | null>(null);
+  const [bookmarks, setBookmarks] = useState<
+    Array<{
+      id: string;
+      savedAt: string;
+      targetAddress: string;
+      targetLabel: string;
+      nodeCount: number;
+      nodes: Node[];
+      edges: Edge[];
+    }>
+  >(() => {
+    try {
+      const raw = localStorage.getItem("cryptotrace_saved_investigations");
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
   const { fitView, zoomIn, zoomOut } = useReactFlow();
 
   const handleNodeSelect = useCallback(
@@ -657,24 +689,26 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
               }
               const labelLower = label.toLowerCase();
 
-              let category: FlowNodeData["category"] = "wallet";
-              let risk = 20;
+              let category: FlowNodeData["category"] = (n.data?.category as FlowNodeData["category"]) || "wallet";
+              let risk: number = typeof n.data?.riskScore === "number" ? n.data.riskScore : 20;
 
               if (isTarget) {
-                category = known ? known.category : "target";
-                risk = known ? known.riskScore : 68;
-              } else if (labelLower.includes("mixer") || labelLower.includes("tornado") || labelLower.includes("railgun")) {
-                category = "mixer";
-                risk = 95;
-              } else if (labelLower.includes("uniswap") || labelLower.includes("curve") || labelLower.includes("dex") || labelLower.includes("swap")) {
-                category = "dex";
-                risk = 15;
-              } else if (labelLower.includes("binance") || labelLower.includes("coinbase") || labelLower.includes("kraken") || labelLower.includes("cex")) {
-                category = "cex";
-                risk = 25;
-              } else if (labelLower.includes("storage") || labelLower.includes("cold") || labelLower.includes("vault")) {
-                category = "storage";
-                risk = 5;
+                category = known ? known.category : (n.data?.category || "target");
+                risk = known ? known.riskScore : (n.data?.riskScore ?? 68);
+              } else if (!n.data?.category) {
+                if (labelLower.includes("mixer") || labelLower.includes("tornado") || labelLower.includes("railgun")) {
+                  category = "mixer";
+                  risk = 95;
+                } else if (labelLower.includes("uniswap") || labelLower.includes("curve") || labelLower.includes("dex") || labelLower.includes("swap")) {
+                  category = "dex";
+                  risk = 15;
+                } else if (labelLower.includes("binance") || labelLower.includes("coinbase") || labelLower.includes("kraken") || labelLower.includes("cex")) {
+                  category = "cex";
+                  risk = 25;
+                } else if (labelLower.includes("storage") || labelLower.includes("cold") || labelLower.includes("vault")) {
+                  category = "storage";
+                  risk = 5;
+                }
               }
 
               let pos = n.position;
@@ -698,6 +732,7 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
                   address: n.id,
                   category,
                   riskScore: risk,
+                  ethAmount: n.data?.ethAmount,
                   isTarget,
                   onSelect: handleNodeSelect,
                 },
@@ -785,6 +820,131 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
 
   const activeDisplayLabel = getKnownEntityLabel(activeTarget);
 
+  const handleSaveImage = useCallback(async () => {
+    setIsExporting(true);
+    setShowSaveDropdown(false);
+    try {
+      const flowViewport = document.querySelector(".react-flow__viewport") as HTMLElement;
+      if (!flowViewport) throw new Error("Flow canvas viewport not found");
+
+      const dataUrl = await toPng(flowViewport, {
+        backgroundColor: "#131424",
+        quality: 0.95,
+        pixelRatio: 2,
+      });
+
+      const link = document.createElement("a");
+      link.download = `cryptotrace_flow_${activeTarget.slice(0, 10)}.png`;
+      link.href = dataUrl;
+      link.click();
+
+      setSaveFeedback("Snapshot saved as PNG!");
+      setTimeout(() => setSaveFeedback(null), 3500);
+    } catch (err) {
+      console.error("Export image error:", err);
+      setSaveFeedback("Failed to export image");
+      setTimeout(() => setSaveFeedback(null), 3500);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [activeTarget]);
+
+  const handleSaveJSON = useCallback(() => {
+    setShowSaveDropdown(false);
+    try {
+      const payload = {
+        reportTitle: "CryptoTrace AI — Money Flow Forensic Docket",
+        exportedAt: new Date().toISOString(),
+        targetAddress: activeTarget,
+        targetLabel: activeDisplayLabel,
+        summary: {
+          nodesCount: nodes.length,
+          edgesCount: edges.length,
+          highRiskCount: nodes.filter((n) => Number((n.data as any)?.riskScore || 0) >= 70).length,
+        },
+        nodes: nodes.map((n) => ({
+          id: n.id,
+          position: n.position,
+          data: n.data,
+        })),
+        edges: edges.map((e) => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          label: e.label,
+          data: e.data,
+        })),
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = `cryptotrace_docket_${activeTarget.slice(0, 10)}.json`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      setSaveFeedback("Docket exported as JSON!");
+      setTimeout(() => setSaveFeedback(null), 3500);
+    } catch (err) {
+      console.error("Export JSON error:", err);
+    }
+  }, [activeTarget, activeDisplayLabel, nodes, edges]);
+
+  const handleBookmarkCase = useCallback(() => {
+    setShowSaveDropdown(false);
+    const newBookmark = {
+      id: `${activeTarget}_${Date.now()}`,
+      savedAt: new Date().toLocaleString(),
+      targetAddress: activeTarget,
+      targetLabel: activeDisplayLabel,
+      nodeCount: nodes.length,
+      nodes: nodes,
+      edges: edges,
+    };
+    const updated = [newBookmark, ...bookmarks.filter((b) => b.targetAddress !== activeTarget)].slice(0, 25);
+    setBookmarks(updated);
+    try {
+      localStorage.setItem("cryptotrace_saved_investigations", JSON.stringify(updated));
+    } catch {
+      // Storage quota or disabled
+    }
+    setSaveFeedback("Investigation bookmarked!");
+    setTimeout(() => setSaveFeedback(null), 3500);
+  }, [activeTarget, activeDisplayLabel, nodes, edges, bookmarks]);
+
+  const handleLoadBookmark = useCallback(
+    (item: (typeof bookmarks)[0]) => {
+      setActiveTarget(item.targetAddress);
+      if (onSelectAddress) {
+        onSelectAddress(item.targetAddress);
+      }
+      setNodes(item.nodes.map((n) => ({ ...n, data: { ...n.data, onSelect: handleNodeSelect } })));
+      setEdges(item.edges);
+      setShowBookmarksModal(false);
+      setSaveFeedback(`Loaded case: ${item.targetLabel}`);
+      setTimeout(() => {
+        fitView({ padding: 0.35, duration: 600 });
+        setSaveFeedback(null);
+      }, 3500);
+    },
+    [fitView, handleNodeSelect, onSelectAddress, setEdges, setNodes]
+  );
+
+  const handleDeleteBookmark = useCallback(
+    (id: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      const updated = bookmarks.filter((b) => b.id !== id);
+      setBookmarks(updated);
+      try {
+        localStorage.setItem("cryptotrace_saved_investigations", JSON.stringify(updated));
+      } catch {
+        // Ignored
+      }
+    },
+    [bookmarks]
+  );
+
   return (
     <div
       className={`w-full h-full bg-[#1b1c33] rounded-[2rem] relative overflow-hidden border border-white/5 flex flex-col transition-all duration-300 shadow-2xl ${
@@ -818,6 +978,89 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
 
         {/* Interactive Controls */}
         <div className="flex items-center gap-2" role="toolbar" aria-label="Graph canvas controls">
+          {/* Save / Export Dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowSaveDropdown((prev) => !prev)}
+              aria-expanded={showSaveDropdown}
+              aria-haspopup="true"
+              aria-label="Save and export graph options"
+              disabled={isExporting}
+              className="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/40 text-cyber-cyan text-xs font-mono font-bold flex items-center gap-1.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.15)] disabled:opacity-50"
+            >
+              <Download size={13} className={isExporting ? "animate-bounce" : ""} aria-hidden="true" />
+              <span>{isExporting ? "Saving..." : "Save Graph"}</span>
+              <ChevronDown size={12} className={`transition-transform duration-200 ${showSaveDropdown ? "rotate-180" : ""}`} aria-hidden="true" />
+            </button>
+
+            {/* Dropdown Menu */}
+            {showSaveDropdown && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowSaveDropdown(false)}
+                  aria-hidden="true"
+                />
+                <div className="absolute left-0 top-full mt-2 w-60 rounded-2xl bg-[#171829]/95 border border-cyan-500/40 shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-2 z-50 flex flex-col gap-1 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150">
+                  <button
+                    type="button"
+                    onClick={handleSaveImage}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-mono text-white/80 hover:text-white hover:bg-cyan-500/15 transition-colors cursor-pointer group"
+                  >
+                    <Camera size={14} className="text-cyan-400 group-hover:scale-110 transition-transform" />
+                    <div>
+                      <div className="font-bold text-white">Save Image (.PNG)</div>
+                      <div className="text-[9px] text-white/40">High-res canvas snapshot</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSaveJSON}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-mono text-white/80 hover:text-white hover:bg-cyan-500/15 transition-colors cursor-pointer group"
+                  >
+                    <FileJson size={14} className="text-emerald-400 group-hover:scale-110 transition-transform" />
+                    <div>
+                      <div className="font-bold text-white">Save Docket (.JSON)</div>
+                      <div className="text-[9px] text-white/40">Raw nodes & edge metadata</div>
+                    </div>
+                  </button>
+
+                  <div className="h-[1px] bg-white/5 my-0.5" />
+
+                  <button
+                    type="button"
+                    onClick={handleBookmarkCase}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-mono text-white/80 hover:text-white hover:bg-cyan-500/15 transition-colors cursor-pointer group"
+                  >
+                    <Bookmark size={14} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                    <div>
+                      <div className="font-bold text-white">Bookmark Investigation</div>
+                      <div className="text-[9px] text-white/40">Save to browser session</div>
+                    </div>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Bookmarks Manager Drawer Button */}
+          <button
+            type="button"
+            onClick={() => setShowBookmarksModal(true)}
+            aria-label={`Open saved investigations (${bookmarks.length} saved)`}
+            className="px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white text-xs font-mono flex items-center gap-1.5 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          >
+            <FolderOpen size={13} className="text-amber-400" aria-hidden="true" />
+            <span className="hidden sm:inline">Saved Cases</span>
+            {bookmarks.length > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[9px] font-bold tabular-nums">
+                {bookmarks.length}
+              </span>
+            )}
+          </button>
+
           {/* Layout Mode Toggle Button */}
           <button
             type="button"
@@ -935,6 +1178,83 @@ function FlowCanvasInner({ selectedAddress, onSelectAddress }: Props) {
             <span>CEX / Hot Deposit</span>
           </div>
         </div>
+        {/* Save Feedback Floating Toast */}
+        {saveFeedback && (
+          <div className="absolute top-4 right-4 z-50 px-4 py-2 rounded-xl bg-[#1b1c33]/95 border border-cyan-400/50 text-cyan-300 text-xs font-mono font-bold shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+            <Check size={14} className="text-emerald-400" />
+            <span>{saveFeedback}</span>
+          </div>
+        )}
+
+        {/* Saved Investigations Modal */}
+        {showBookmarksModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
+            <div className="w-full max-w-lg bg-[#1b1c33] border border-cyan-500/30 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 max-h-[80vh] overflow-hidden">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    <BookmarkCheck size={16} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold font-heading text-white">Saved Graph Investigations</h3>
+                    <p className="text-[10px] text-white/40 font-mono">
+                      {bookmarks.length} bookmarked wallet topologies
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowBookmarksModal(false)}
+                  className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2 pr-1">
+                {bookmarks.length === 0 ? (
+                  <div className="py-12 text-center text-xs font-mono text-white/30">
+                    No bookmarked investigations yet. Click &quot;Save Graph &rarr; Bookmark Investigation&quot; to save one.
+                  </div>
+                ) : (
+                  bookmarks.map((b) => (
+                    <div
+                      key={b.id}
+                      onClick={() => handleLoadBookmark(b)}
+                      className="p-3.5 rounded-2xl bg-[#131424] hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/30 transition-all cursor-pointer group flex items-center justify-between gap-3"
+                    >
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold font-heading text-white group-hover:text-cyan-300 truncate">
+                            {b.targetLabel}
+                          </span>
+                          <span className="text-[9px] font-mono px-2 py-0.2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 shrink-0">
+                            {b.nodeCount} nodes
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-mono text-white/40 truncate">
+                          {b.targetAddress}
+                        </span>
+                        <span className="text-[9px] font-mono text-white/30 mt-0.5">
+                          Saved: {b.savedAt}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteBookmark(b.id, e)}
+                        title="Delete bookmark"
+                        className="p-2 rounded-xl text-white/30 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
