@@ -215,6 +215,7 @@ def fetch_live_ethereum_transactions(limit=6):
 
 
 @app.get("/api/health")
+@app.get("/health")
 def health_check():
     return {
         "status": "healthy",
@@ -227,6 +228,7 @@ def health_check():
 
 
 @app.get("/api/feed")
+@app.get("/feed")
 def get_live_feed():
     try:
         txs = fetch_live_ethereum_transactions(limit=6)
@@ -296,6 +298,7 @@ def get_live_feed():
 
 
 @app.get("/api/history")
+@app.get("/history")
 def get_historical_transactions(limit: int = Query(default=50, ge=1, le=100)):
     """Retrieves only flagged audit history from PostgreSQL."""
     if not SessionLocal:
@@ -329,6 +332,7 @@ def get_historical_transactions(limit: int = Query(default=50, ge=1, le=100)):
 
 
 @app.get("/api/graph/{address}")
+@app.get("/graph/{address}")
 def get_wallet_money_flow_graph(address: str, hops: int = Query(default=2, ge=1, le=4)):
     target = address.lower()
 
