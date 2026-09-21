@@ -1,5 +1,38 @@
-import networkx as nx
 from typing import Dict, Any, List, Optional
+
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
+
+
+class InMemoryDiGraph:
+    """Lightweight in-memory graph fallback if networkx is not installed."""
+    def __init__(self):
+        self.nodes = {}
+        self.edges_dict = {}
+
+    def add_node(self, node, **attr):
+        if node not in self.nodes:
+            self.nodes[node] = {}
+        self.nodes[node].update(attr)
+
+    def add_edge(self, u, v, **attr):
+        self.add_node(u)
+        self.add_node(v)
+        self.edges_dict[(u, v)] = attr
+
+    def edges(self, data=False):
+        if data:
+            return [(u, v, d) for (u, v), d in self.edges_dict.items()]
+        return list(self.edges_dict.keys())
+
+    def to_undirected(self):
+        return self
+
+    def __contains__(self, item):
+        return item in self.nodes
+
 
 # Known Ethereum addresses with metadata
 KNOWN_ENTITIES = {
@@ -58,7 +91,7 @@ KNOWN_ENTITIES = {
 
 class MoneyFlowGraphService:
     def __init__(self):
-        self.G = nx.DiGraph()
+        self.G = nx.DiGraph() if nx else InMemoryDiGraph()
 
     def _infer_entity(
         self,
@@ -171,15 +204,35 @@ class MoneyFlowGraphService:
         if root not in self.G:
             return {"nodes": [], "edges": []}
 
-        # Ego graph (undirected radius to capture both inflows and outflows)
-        subgraph = nx.ego_graph(self.G, root, radius=max_hops, undirected=True)
-        if len(subgraph.nodes()) <= 1:
-            return {"nodes": [], "edges": []}
+        if nx:
+            subgraph = nx.ego_graph(self.G, root, radius=max_hops, undirected=True)
+            subgraph_nodes = set(subgraph.nodes())
+            distances = nx.single_source_shortest_path_length(
+                subgraph.to_undirected(), root
+            )
+        else:
+            # Fallback BFS
+            distances = {root: 0}
+            queue = [root]
+            while queue:
+                curr = queue.pop(0)
+                d = distances[curr]
+                if d >= max_hops:
+                    continue
+                neighbors = set()
+                for (u, v) in self.G.edges():
+                    if u == curr:
+                        neighbors.add(v)
+                    elif v == curr:
+                        neighbors.add(u)
+                for nbr in neighbors:
+                    if nbr not in distances:
+                        distances[nbr] = d + 1
+                        queue.append(nbr)
+            subgraph_nodes = set(distances.keys())
 
-        # Calculate distances from root for hierarchical layout
-        distances = nx.single_source_shortest_path_length(
-            subgraph.to_undirected(), root
-        )
+        if len(subgraph_nodes) <= 1:
+            return {"nodes": [], "edges": []}
 
         # Group nodes by hop distance
         hop_levels: Dict[int, List[str]] = {}
@@ -229,7 +282,7 @@ class MoneyFlowGraphService:
 
         # Build React Flow nodes
         nodes = []
-        for node in subgraph.nodes():
+        for node in subgraph_nodes:
             n_data = self.G.nodes.get(node, {})
             is_target = node == root
             label = n_data.get("label", f"{node[:6]}...{node[-4:]}")
@@ -258,7 +311,7 @@ class MoneyFlowGraphService:
         # Build React Flow edges from original directed graph
         edges = []
         for u, v, data in self.G.edges(data=True):
-            if u in subgraph.nodes() and v in subgraph.nodes():
+            if u in subgraph_nodes and v in subgraph_nodes:
                 val = float(data.get("value", 0.0))
                 tx_hash = data.get("tx_hash", "")
                 edges.append({
